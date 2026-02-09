@@ -1,0 +1,38 @@
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h3>DominusoftJobs</h3>
+            <p class="mt-1rem">The Place Where Careers Take Direction. <br> Every profile, a new opportunity.
+            </p>
+        </div>
+        <div class="footer-section">
+            <h3>Quick Links</h3>
+            <ul>
+                <li><a href="{% url 'index' %}">Home</a></li>
+                <li><a href="{% url 'jobs_list' %}">Find Work</a></li>
+                <li><a href="{% url 'about' %}">About Us</a></li>
+                <li><a href="{% url 'contact' %}">Contact</a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h3>For Job Seekers</h3>
+            <ul>
+                <li><a href="{% url 'signup' %}">Create Profile</a></li>
+                <li><a href="{% url 'cv_builder' %}">Build Your CV</a></li>
+                <li><a href="{% url 'jobs_list' %}">Browse Jobs</a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h3>For Employers</h3>
+            <ul>
+                {% if user.is_authenticated and user.profile.user_type == 'company' %}
+                <li><a href="{% url 'post_job' %}">Post a Job</a></li>
+                {% endif %}
+                <li><a href="{% url 'students_list' %}">Find Talent</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2026 DominusoftJobs. All rights reserved.</p>
+    </div>
+</footer>

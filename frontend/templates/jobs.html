@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Browse Jobs - DominusoftJobs{% endblock %}
+
+{% block content %}
+<section class="advanced-search-section pt-100">
+    <div class="search-container">
+        <form method="GET" action="{% url 'jobs_list' %}" class="search-content display-block" id="jobsSearch">
+
+            <h3>Find Your Next Opportunity</h3>
+            <p class="search-subtitle">Search thousands of jobs matching your skills</p>
+
+            <div class="main-search-bar">
+                <div class="search-input-group">
+                    <i class='bx bx-search'></i>
+                    <input type="text" name="q" id="jobSearchInput" placeholder="Job title, keywords, or company"
+                        value="{{ query }}">
+                </div>
+                <div class="search-input-group location">
+                    <i class='bx bx-map'></i>
+                    <input type="text" name="location" id="jobLocationInput" placeholder="City, state, or remote"
+                        value="{{ location }}">
+                </div>
+                <button type="submit" class="search-submit-btn">
+                    Search Jobs
+                </button>
+            </div>
+
+            <div class="search-filters">
+                <button type="button" class="filter-toggle-btn" onclick="toggleFilters('jobs')">
+                    <i class='bx bx-filter'></i>
+                    Advanced Filters
+                    <i class='bx bx-chevron-down' id="jobsFilterIcon"></i>
+                </button>
+            </div>
+
+            <div class="filters-panel display-none" id="jobsFilters">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label>Category</label>
+                        <select name="category" id="jobCategory">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {% if category.is_selected %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                            {% empty %}
+                            <option disabled>No categories found in database</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Experience Level</label>
+                        <select name="experience" id="jobExperience">
+                            <option value="">Any Level</option>
+                            {% for exp in experience_levels %}
+                            <option value="{{ exp.value }}" {% if exp.is_selected %}selected{% endif %}>
+                                {{ exp.label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Job Type</label>
+                        <select name="type" id="jobType">
+                            <option value="">All Types</option>
+                            {% for type in job_types %}
+                            <option value="{{ type.value }}" {% if type.is_selected %}selected{% endif %}>
+                                {{ type.label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Work Location</label>
+                        <select name="work_location" id="jobWorkLocation">
+                            <option value="">Any Location</option>
+                            {% for loc in work_locations %}
+                            <option value="{{ loc.value }}" {% if loc.is_selected %}selected{% endif %}>
+                                {{ loc.label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Posted Within</label>
+                        <select name="posted" id="jobPosted">
+                            {% for option in posted_options %}
+                            <option value="{{ option.value }}" {% if option.is_selected %}selected{% endif %}>
+                                {{ option.label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filters-actions">
+                    <button type="button" class="clear-filters-btn" data-url="{% url 'jobs_list' %}"
+                        onclick="window.location.href=this.getAttribute('data-url');">
+                        Clear All
+                    </button>
+                    <button type="submit" class="apply-filters-btn">
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section class="jobs-list-section jobs-list-bg">
+    <div class="jobs-list" id="recommendedJobs">
+        {% for job in jobs %}
+        <div class="job-item">
+            <div class="job-icon">
+                <i class='bx {{ job.category.icon|default:"bx-briefcase" }}'></i>
+            </div>
+            <div class="job-info">
+                <h4>{{ job.title }}</h4>
+                <p class="job-company">{{ job.company.username }}</p>
+                <div class="job-tags">
+                    <span>{{ job.category.name }}</span>
+                    <span>{{ job.location }}</span>
+                    <span>{{ job.job_type }}</span>
+                </div>
+            </div>
+            <a href="{% url 'apply_job' job.id %}" class="job-apply-btn job-apply-link">Apply Now</a>
+        </div>
+        {% empty %}
+        <p>No jobs found matching your criteria.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

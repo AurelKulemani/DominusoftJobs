@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}DominusoftJobs - Find Students{% endblock %}
+
+{% block content %}
+<section class="browse-section">
+    <div class="sidebar-filters">
+        <h3>Advanced Filters</h3>
+        <form action="{% url 'students_list' %}" method="GET" id="studentFilterForm">
+            <div class="filter-group">
+                <label>Keyword</label>
+                <input type="text" name="keyword" value="{{ keyword }}" placeholder="Skills, name...">
+            </div>
+            <div class="filter-group">
+                <label>Location</label>
+                <input type="text" name="location" value="{{ location }}" placeholder="City, state...">
+            </div>
+            <div class="filter-group">
+                <label>Category</label>
+                <select name="category">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" {% if category.is_selected %}selected{% endif %}>
+                        {{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Experience Level</label>
+                <select name="experience">
+                    <option value="">Any Level</option>
+                    {% for level in experience_levels %}
+                    <option value="{{ level.value }}" {% if level.is_selected %}selected{% endif %}>
+                        {{ level.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="apply-filters-btn">Apply Filters</button>
+            <a href="{% url 'students_list' %}" class="clear-filters-link">Clear All</a>
+        </form>
+    </div>
+
+    <div class="main-content">
+        <div class="results-header">
+            <h2>Found <span>{{ students.count }}</span> Students</h2>
+        </div>
+
+        <div class="results-grid">
+            {% for profile in students %}
+            <div class="student-card">
+                <div class="student-header">
+                    <div class="student-avatar">
+                        {% if profile.profile_picture %}
+                        <img src="{{ profile.profile_picture.url }}" alt="{{ profile.user.get_full_name }}">
+                        {% else %}
+                        <i class='bx bx-user-circle'></i>
+                        {% endif %}
+                    </div>
+                    <div class="student-info">
+                        <h4>{{ profile.user.get_full_name|default:profile.user.username }}</h4>
+                        <p class="student-title">{{ profile.user.cv.title|default:"Student" }}</p>
+                    </div>
+                </div>
+                <div class="student-details">
+                    <span><i class='bx bx-map'></i> {{ profile.location|default:"Anywhere" }}</span>
+                </div>
+                <p class="student-summary">{{ profile.user.cv.summary|truncatewords:25 }}</p>
+                <div class="student-actions">
+                    <button class="view-profile-btn" onclick="location.href='#'">View Profile</button>
+                </div>
+            </div>
+            {% empty %}
+            <div class="no-results">
+                <p>No students found matching your criteria.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

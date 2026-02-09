@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=1.1">
+    <title>{% block title %}DominusoftJobs{% endblock %}</title>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+    <nav>
+        <a href="{% url 'index' %}" class="logo">DominusoftJobs</a>
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <i class='bx bx-menu'></i>
+        </div>
+        <div class="links" id="navLinks">
+            <a href="{% url 'index' %}"
+                class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">Home</a>
+            <a href="{% url 'about' %}"
+                class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">About Us</a>
+            <a href="{% url 'contact' %}"
+                class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact</a>
+            <a href="{% url 'jobs_list' %}"
+                class="{% if request.resolver_match.url_name == 'jobs_list' %}active{% endif %}">Find Work</a>
+        </div>
+        <div class="login">
+            {% if user.is_authenticated %}
+            {% if user.profile.user_type == 'student' %}
+            <button data-url="{% url 'student_dashboard' %}"
+                onclick="location.href=this.getAttribute('data-url');">Dashboard</button>
+            {% else %}
+            <button data-url="{% url 'company_dashboard' %}"
+                onclick="location.href=this.getAttribute('data-url');">Dashboard</button>
+            {% endif %}
+            <button class="signup" data-url="{% url 'logout' %}"
+                onclick="location.href=this.getAttribute('data-url');">Logout</button>
+            {% else %}
+            <button class="signup" data-url="{% url 'signup' %}"
+                onclick="location.href=this.getAttribute('data-url');">Get Started</button>
+            <button data-url="{% url 'login' %}" onclick="location.href=this.getAttribute('data-url');">Login</button>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main>
+        {% if messages %}
+        <div class="messages-container">
+
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% include 'footer.html' %}
+
+    <script src="{% static 'script.js' %}?v=1.1"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

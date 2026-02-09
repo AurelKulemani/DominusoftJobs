@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Student Dashboard - DominusoftJobs{% endblock %}
+
+{% block content %}
+
+<div class="cv-builder-header">
+    <div class="cv-header-content">
+        <div class="cv-header-left">
+            <i class='bx bxs-dashboard'></i>
+            <div>
+                <h2>Student Dashboard</h2>
+                <p>Welcome back, {{ user.first_name|default:user.username }}!</p>
+            </div>
+        </div>
+        <div class="cv-header-actions">
+            <button class="cv-btn cv-btn-primary" data-url="{% url 'jobs_list' %}"
+                onclick="location.href=this.getAttribute('data-url')">
+                <i class='bx bx-search'></i> Find Jobs
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="cv-builder-container">
+    <div class="cv-builder-content">
+        <div class="cv-sidebar">
+            <div class="cv-nav-card">
+                <a href="#" class="cv-nav-item active">
+                    <i class='bx bx-home-alt'></i>Overview
+                </a>
+                <a href="{% url 'profile' %}" class="cv-nav-item">
+                    <i class='bx bx-user'></i>My Profile
+                </a>
+                <a href="{% url 'cv_builder' %}" class="cv-nav-item">
+                    <i class='bx bx-file'></i>CV Builder
+                </a>
+                <a href="{% url 'jobs_list' %}" class="cv-nav-item">
+                    <i class='bx bx-briefcase'></i>Jobs
+                </a>
+                <a href="{% url 'profile' %}#settings" class="cv-nav-item">
+                    <i class='bx bx-cog'></i>Settings
+                </a>
+            </div>
+
+            <div class="cv-nav-card nav-card-status">
+                <h4 class="nav-card-title">Profile Status</h4>
+
+                <div class="profile-completion">
+                    <div class="progress-info">
+                        <span>Completion</span>
+                        <span>{% if user.cv %}100%{% else %}25%{% endif %}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill {% if user.cv %}w-100{% else %}w-25{% endif %}"></div>
+                    </div>
+                    {% if not user.cv %}
+                    <p class="completion-tip">Add your CV to unlock more opportunities!</p>
+                    <button class="cv-btn cv-btn-secondary w-full-center mb-10" data-url="{% url 'cv_builder' %}"
+                        onclick="location.href=this.getAttribute('data-url')">
+                        Build CV
+                    </button>
+                    <div class="upload-cv-section mt-15">
+                        <p class="text-xs text-center mb-5">OR</p>
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <label for="cv_file_input" class="cv-btn cv-btn-primary-outline w-full-center">
+                                <i class='bx bx-upload'></i> Upload CV
+                            </label>
+                            <input type="file" name="cv_file" id="cv_file_input" class="display-none"
+                                onchange="this.form.submit()">
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="cv-main-content">
+            <div class="stats-overview stats-overview-grid">
+
+                <div class="cv-content-card stats-card">
+                    <i class='bx bx-file stats-icon-box'></i>
+                    <div>
+                        <h3 class="stats-title">Applications</h3>
+                        <p class="stats-value">{{ applications.count }}</p>
+                    </div>
+                </div>
+                <div class="cv-content-card stats-card">
+                    <i class='bx bx-show stats-icon-box'></i>
+                    <div>
+                        <h3 class="stats-title">Views</h3>
+                        <p class="stats-value">0</p>
+                    </div>
+                </div>
+                <div class="cv-content-card stats-card">
+                    <i class='bx bx-star stats-icon-box'></i>
+                    <div>
+                        <h3 class="stats-title">Saved</h3>
+                        <p class="stats-value">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cv-content-card">
+                <div class="cv-tab-header">
+                    <div>
+                        <h3>Recent Applications</h3>
+                        <p>Track the status of your job applications</p>
+                    </div>
+                    <a href="#" class="cv-btn cv-btn-secondary">View All</a>
+                </div>
+                <div class="applications-list">
+                    {% if applications %}
+                    <table class="table-full">
+
+                        <thead>
+                            <tr class="table-head-row">
+                                <th class="table-cell">Job Title</th>
+                                <th class="table-cell">Company</th>
+                                <th class="table-cell">Date Applied</th>
+                                <th class="table-cell">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in applications %}
+                            <tr class="table-row-bordered">
+                                <td class="table-cell">{{ app.job.title }}</td>
+                                <td class="table-cell">{{ app.job.company.username }}</td>
+                                <td class="table-cell">{{ app.applied_at|date:"M d, Y" }}</td>
+                                <td class="table-cell">
+                                    <span class="status-badge status-{{ app.status|lower }}">
+                                        {{ app.get_status_display }}
+                                    </span>
+                                    {% if app.resume_file %}
+                                    <a href="{{ app.resume_file.url }}" class="ms-2" target="_blank" title="View CV">
+                                        <i class='bx bx-file-find'></i>
+                                    </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-state-container">
+                        <i class='bx bx-briefcase-alt-2' class="empty-state-icon"></i>
+                        <p class="empty-state-text-mb">You haven't applied to any jobs yet.</p>
+                        <button class="cv-btn cv-btn-primary" data-url="{% url 'jobs_list' %}"
+                            onclick="location.href=this.getAttribute('data-url')">Browse Jobs</button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

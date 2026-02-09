@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile - DominusoftJobs{% endblock %}
+
+{% block content %}
+<div class="cv-builder-header">
+    <div class="cv-header-content">
+        <div class="cv-header-left">
+            <div class="profile-avatar avatar-circle">
+                {% if user.profile.profile_picture %}
+                <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="avatar-img">
+                {% else %}
+                <i class='bx bx-user avatar-icon'></i>
+                {% endif %}
+            </div>
+            <div>
+                <h2>My Profile</h2>
+                <p>{{ user.get_full_name|default:user.username }} ({{ user.email }})</p>
+            </div>
+        </div>
+        <div class="cv-header-actions">
+            <button class="cv-btn cv-btn-primary" data-url="{% url 'jobs_list' %}"
+                onclick="location.href=this.getAttribute('data-url')">
+                <i class='bx bx-search'></i> Find Jobs
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="cv-builder-container">
+    <div class="cv-builder-content">
+        <div class="cv-sidebar">
+            <div class="cv-nav-card">
+                <a href="#" class="cv-nav-item active" onclick="showProfileTab(event, 'overview')">
+                    <i class='bx bx-home'></i>Overview
+                </a>
+                <a href="#" class="cv-nav-item" onclick="showProfileTab(event, 'cv')">
+                    <i class='bx bx-file'></i>My CV
+                </a>
+                <a href="#" class="cv-nav-item" onclick="showProfileTab(event, 'applications')">
+                    <i class='bx bx-briefcase'></i>My Applications
+                </a>
+                <a href="#" class="cv-nav-item" onclick="showProfileTab(event, 'settings')">
+                    <i class='bx bx-cog'></i>Settings
+                </a>
+            </div>
+        </div>
+
+        <div class="cv-main-content">
+
+            <div id="overviewTab" class="profile-tab active">
+                <div class="cv-content-card">
+                    <div class="cv-tab-header">
+                        <div>
+                            <h3>Dashboard Overview</h3>
+                            <p>Quick summary of your activity</p>
+                        </div>
+                    </div>
+
+                    <div class="cv-form-grid mt-20">
+                        <div class="cv-item-card stats-card">
+                            <i class='bx bx-file stats-icon-box'></i>
+                            <div>
+                                <h4 class="stats-title">CV Status</h4>
+                                <p class="stats-value">
+                                    {% if user.cv %}
+                                    Active
+                                    {% else %}
+                                    Not Created
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="cv-item-card stats-card">
+                            <i class='bx bx-briefcase stats-icon-box'></i>
+                            <div>
+                                <h4 class="stats-title">Applications</h4>
+                                <p class="stats-value">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-30">
+                        <h4 class="nav-card-title">Quick Actions</h4>
+                        <div class="grid-auto-200">
+                            <button class="cv-btn cv-btn-primary w-full-center" data-url="{% url 'cv_builder' %}"
+                                onclick="location.href=this.getAttribute('data-url')">
+                                <i class='bx bx-plus'></i>Build Your CV
+                            </button>
+                            <button class="cv-btn cv-btn-secondary w-full-center" data-url="{% url 'jobs_list' %}"
+                                onclick="location.href=this.getAttribute('data-url')">
+                                <i class='bx bx-search'></i>Find Jobs
+                            </button>
+                            <button class="cv-btn cv-btn-info w-full-center"
+                                onclick="showProfileTab(event, 'settings')">
+                                <i class='bx bx-edit'></i>Edit Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="cvTab" class="profile-tab display-none">
+
+                <div class="cv-content-card">
+                    <div class="cv-tab-header">
+                        <div>
+                            <h3>My CV</h3>
+                            <p>Manage your professional resume</p>
+                        </div>
+                    </div>
+
+                    {% if user.cv %}
+                    <div class="cv-item-card">
+                        <div class="cv-item-header">
+                            <h4>{{ user.cv.title }}</h4>
+                            <button class="cv-btn cv-btn-primary" data-url="{% url 'cv_builder' %}"
+                                onclick="location.href=this.getAttribute('data-url')">
+                                <i class='bx bx-edit'></i>Edit
+                            </button>
+                        </div>
+                        <p class="empty-state-text lh-1-6">{{ user.cv.summary|truncatewords:50 }}</p>
+
+                    </div>
+                    {% else %}
+                    <div class="empty-state-container">
+                        <i class='bx bx-file-blank' class="empty-state-icon"></i>
+                        <h3 class="mb-15">No CV Created Yet</h3>
+                        <p class="empty-state-text-mb">Create your professional CV to start applying for jobs</p>
+                        <button class="cv-btn cv-btn-primary" data-url="{% url 'cv_builder' %}"
+                            onclick="location.href=this.getAttribute('data-url')">
+                            <i class='bx bx-plus'></i>Create CV Now
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div id="applicationsTab" class="profile-tab display-none">
+
+                <div class="cv-content-card">
+                    <div class="cv-tab-header">
+                        <div>
+                            <h3>My Applications</h3>
+                            <p>Track your job application history</p>
+                        </div>
+                    </div>
+
+                    <div class="empty-state-container">
+                        <i class='bx bx-briefcase-alt' class="empty-state-icon"></i>
+                        <h3 class="mb-15">No Applications Yet</h3>
+                        <p class="empty-state-text-mb">You haven't applied to any jobs yet. Start browsing available
+                            opportunities!</p>
+                        <button class="cv-btn cv-btn-primary" data-url="{% url 'jobs_list' %}"
+                            onclick="location.href=this.getAttribute('data-url')">
+                            <i class='bx bx-search'></i>Browse Jobs
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="settingsTab" class="profile-tab display-none">
+
+                <div class="cv-content-card">
+                    <div class="cv-tab-header">
+                        <div>
+                            <h3>Account Settings</h3>
+                            <p>Update your personal information and security</p>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{% url 'profile' %}">
+                        {% csrf_token %}
+                        <div class="cv-form-grid">
+                            <div class="cv-form-group">
+                                <label><i class='bx bx-user-circle'></i> Username</label>
+                                <input type="text" name="username" value="{{ user.username }}" placeholder="Username">
+                            </div>
+                            <div class="cv-form-group">
+                                <label><i class='bx bx-envelope'></i> Email Address</label>
+                                <input type="email" name="email" value="{{ user.email }}" readonly
+                                    class="bg-light-blue">
+                            </div>
+                            <div class="cv-form-group">
+                                <label><i class='bx bx-user'></i> First Name</label>
+                                <input type="text" name="first_name" value="{{ user.first_name }}"
+                                    placeholder="First name">
+                            </div>
+                            <div class="cv-form-group">
+                                <label><i class='bx bx-user'></i> Last Name</label>
+                                <input type="text" name="last_name" value="{{ user.last_name }}"
+                                    placeholder="Last name">
+                            </div>
+                            {% if user.profile.user_type == 'company' %}
+                            <div class="cv-form-group">
+                                <label><i class='bx bx-building'></i> Company Name</label>
+                                <input type="text" name="company_name" value="{{ user.profile.company_name }}"
+                                    placeholder="Company name">
+                            </div>
+                            {% endif %}
+                            <div class="cv-form-group">
+                                <label><i class='bx bx-phone'></i> Phone Number</label>
+                                <input type="tel" name="phone" value="{{ user.profile.phone }}"
+                                    placeholder="+1 (555) 123-4567">
+                            </div>
+                            <div class="cv-form-group full-width">
+                                <label><i class='bx bx-map'></i> Location</label>
+                                <input type="text" name="location" value="{{ user.profile.location }}"
+                                    placeholder="City, Country">
+                            </div>
+                        </div>
+                        <div class="mt-30 form-flex justify-end">
+
+                            <button type="submit" class="cv-btn cv-btn-success">
+                                <i class='bx bx-save'></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="mt-40 pt-30 bt-1-eee">
+                        <h4 class="text-danger mb-15">Security & Account</h4>
+                        <button class="cv-btn btn-danger-outline" onclick="deleteAccount()">
+                            <i class='bx bx-trash'></i>Delete Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

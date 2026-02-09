@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Post a Job - DominusoftJobs{% endblock %}
+
+{% block content %}
+<section class="post-job-section">
+    <div class="post-job-container">
+        <div class="post-job-header">
+            <h2>Post a New <span>Opportunity</span></h2>
+            <p>Reach out to thousands of talented students looking for their next challenge.</p>
+        </div>
+
+        <form class="post-job-form" method="POST" action="{% url 'post_job' %}">
+            {% csrf_token %}
+            <div class="form-section">
+                <h3><i class='bx bx-info-circle'></i> Basic Information</h3>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="job-title">Job Title *</label>
+                        <input type="text" id="job-title" name="title" placeholder="e.g. Senior Frontend Developer"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="job-category">Category *</label>
+                        <select id="job-category" name="category" required>
+                            <option value="">Select Category</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="job-type">Job Type *</label>
+                        <select id="job-type" name="job_type" required>
+                            <option value="Full-time">Full-Time</option>
+                            <option value="Part-time">Part-Time</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Remote">Remote</option>
+                            <option value="Internship">Internship</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3><i class='bx bx-map-pin'></i> Location & Compensation</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="job-location">Location *</label>
+                        <input type="text" id="job-location" name="location" placeholder="e.g. Remote, New York, NY"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="salary-range">Salary Range</label>
+                        <input type="text" id="salary-range" name="salary_range" placeholder="e.g. $50k - $80k">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3><i class='bx bx-detail'></i> Job Details</h3>
+                <div class="form-group">
+                    <label for="job-description">Job Description *</label>
+                    <textarea id="job-description" name="description" rows="10"
+                        placeholder="Describe the responsibilities, requirements, and benefits..." required></textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" data-url="{% url 'index' %}"
+                    onclick="location.href=this.getAttribute('data-url')">Cancel</button>
+                <button type="submit" class="btn-submit">Post Job Now</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

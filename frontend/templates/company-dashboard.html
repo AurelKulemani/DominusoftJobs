@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Company Dashboard - DominusoftJobs{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-header-content">
+        <div class="user-welcome">
+            <h1>Welcome, {{ user.profile.company_name|default:user.username }}!</h1>
+            <p>Manage your job postings and find top talent</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-primary" data-url="{% url 'post_job' %}"
+                onclick="location.href=this.getAttribute('data-url')">
+                <i class='bx bx-plus'></i> Post New Job
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-container">
+    <div class="dashboard-grid">
+        <div class="dashboard-main">
+            <div class="stats-overview">
+                <div class="stat-box">
+                    <i class='bx bx-briefcase'></i>
+                    <div class="stat-content">
+                        <h3>Active Jobs</h3>
+                        <p class="stat-number">{{ active_jobs_count }}</p>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <i class='bx bx-user-check'></i>
+                    <div class="stat-content">
+                        <h3>Total Applications</h3>
+                        <p class="stat-number">{{ total_applications_count }}</p>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <i class='bx bx-star'></i>
+                    <div class="stat-content">
+                        <h3>Shortlisted</h3>
+                        <p class="stat-number">{{ shortlisted_count }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2>My Job Postings</h2>
+                    <a href="#" class="view-all">View All</a>
+                </div>
+                <div class="jobs-list">
+                    {% for job in jobs %}
+                    <div class="job-item">
+                        <div class="job-icon">
+                            <i class='bx {{ job.category.icon|default:"bx-briefcase" }}'></i>
+                        </div>
+                        <div class="job-info">
+                            <h4>{{ job.title }}</h4>
+                            <p class="job-meta">Posted {{ job.created_at|timesince }} ago • {{ job.applicant_count }}
+                                applications</p>
+                        </div>
+                        <div class="job-actions">
+                            <button class="btn btn-outline" data-url="{% url 'view_applicants' job.id %}"
+                                onclick="location.href=this.getAttribute('data-url')">View Applicants</button>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">
+                        <i class='bx bx-briefcase'></i>
+                        <p>You haven't posted any jobs yet.</p>
+                        <button class="btn btn-secondary" data-url="{% url 'post_job' %}"
+                            onclick="location.href=this.getAttribute('data-url')">Post Your First Job</button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-sidebar">
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2>Quick Actions</h2>
+                </div>
+                <ul class="quick-links-list">
+                    <li><a href="{% url 'post_job' %}"><i class='bx bx-plus'></i> Post a Job</a></li>
+                    <li><a href="{% url 'profile' %}"><i class='bx bx-user'></i> Company Profile</a></li>
+                    <li><a href="{% url 'index' %}?search=students"><i class='bx bx-search'></i> Browse Talent</a></li>
+                    <li><a href="{% url 'profile' %}#settings"><i class='bx bx-cog'></i> Settings</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

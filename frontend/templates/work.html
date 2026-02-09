@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}DominusoftJobs - Find Work{% endblock %}
+
+{% block content %}
+<section class="work-section">
+    <h2>Find Your Next <span>Opportunity</span></h2>
+    <div class="work-content">
+        <p>Browse through thousands of available projects and connect with clients looking for your skills.</p>
+
+        <div class="work-categories">
+            {% for category in categories %}
+            <div class="category-card" data-url="{% url 'jobs_list' %}?category={{ category.id }}"
+                onclick="location.href=this.getAttribute('data-url')">
+                <i class='bx {{ category.icon|default:"bx-briefcase" }}'></i>
+                <h4>{{ category.name }}</h4>
+            </div>
+            {% empty %}
+            <div class="category-card">
+                <i class='bx bx-code-alt'></i>
+                <h4>Programming</h4>
+            </div>
+            <div class="category-card">
+                <i class='bx bx-palette'></i>
+                <h4>Graphic Design</h4>
+            </div>
+            <div class="category-card">
+                <i class='bx bx-line-chart'></i>
+                <h4>Digital Marketing & SEO</h4>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

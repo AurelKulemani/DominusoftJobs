@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Applicants for {{ job.title }} - DominusoftJobs{% endblock %}
+
+{% block content %}
+<div class="dashboard-page-wrapper">
+    <div class="dashboard-full-card">
+        <div class="card-header-premium">
+            <div>
+                <h2>Applicants for {{ job.title }}</h2>
+                <p style="margin-top: 5px; opacity: 0.9; font-size: 14px;">Review and manage candidates for this
+                    position
+                </p>
+            </div>
+            <a href="{% url 'company_dashboard' %}" class="btn-cancel"
+                style="padding: 10px 20px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                <i class='bx bx-arrow-back'></i> Back to Dashboard
+            </a>
+        </div>
+
+        <div class="card-body-premium">
+            <div class="premium-table-container">
+                {% if applicants %}
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>Candidate</th>
+                            <th>Applied On</th>
+                            <th>Current Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in applicants %}
+                        <tr>
+                            <td>
+                                <div class="candidate-info">
+                                    <span class="candidate-name">{{ app.student.username }}</span>
+                                    <span class="candidate-email">{{ app.student.email }}</span>
+                                </div>
+                            </td>
+                            <td>{{ app.applied_at|date:"M d, Y" }}</td>
+                            <td>
+                                <span class="status-badge status-{{ app.status }}">
+                                    {{ app.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-form-premium">
+                                    {% if app.resume_file %}
+                                    <a href="{{ app.resume_file.url }}" class="btn-view-cv" target="_blank"
+                                        title="View CV">
+                                        <i class='bx bx-file' style="font-size: 18px;"></i>
+                                    </a>
+                                    {% endif %}
+                                    <form method="POST" action="{% url 'update_application_status' app.id %}"
+                                        class="action-form-premium">
+                                        {% csrf_token %}
+                                        <select name="status" class="select-premium">
+                                            <option value="pending" {% if app.status == 'pending' %}selected{% endif %}>
+                                                Pending</option>
+                                            <option value="reviewed" {% if app.status == 'reviewed' %}selected{% endif %}>
+                                                Reviewed</option>
+                                            <option value="accepted" {% if app.status == 'accepted' %}selected{% endif %}>
+                                                Accepted</option>
+                                            <option value="rejected" {% if app.status == 'rejected' %}selected{% endif %}>
+                                                Rejected</option>
+                                        </select>
+                                        <button type="submit" class="btn-update-status">Update</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div style="text-align: center; padding: 60px 0;">
+                    <i class='bx bx-user-x' style="font-size: 64px; color: #cbd5e0; margin-bottom: 20px;"></i>
+                    <p style="color: #718096; font-size: 18px;">No applicants for this job yet.</p>
+                    <a href="{% url 'company_dashboard' %}" class="btn-submit"
+                        style="display: inline-block; margin-top: 20px; padding: 12px 30px; text-decoration: none;">Return
+                        to Dashboard</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

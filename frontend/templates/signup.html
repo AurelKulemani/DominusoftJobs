@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}DominusoftJobs Sign Up{% endblock %}
+
+{% block extra_head %}
+<script src="https://accounts.google.com/gsi/client?hl=en" async defer></script>
+{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="auth-container signup-container">
+        <h2>Create Your <span>Account</span></h2>
+
+        <div class="role-selection" id="roleSelection">
+            <p class="role-question">What best describes you?</p>
+            <div class="role-cards">
+                <div class="role-card" onclick="selectRole('student')">
+                    <i class='bx bx-user'></i>
+                    <h3>I'm a Student</h3>
+                    <p>Looking for work opportunities</p>
+                    <ul>
+                        <li>Create professional CV</li>
+                        <li>Browse job listings</li>
+                        <li>Apply to projects</li>
+                        <li>Build your portfolio</li>
+                    </ul>
+                </div>
+                <div class="role-card" onclick="selectRole('company')">
+                    <i class='bx bx-buildings'></i>
+                    <h3>I'm a Company</h3>
+                    <p>Looking to hire talent</p>
+                    <ul>
+                        <li>Post job opportunities</li>
+                        <li>Browse student profiles</li>
+                        <li>Manage applications</li>
+                        <li>Hire top talent</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <form id="signupForm" class="display-none" method="POST" action="{% url 'signup' %}">
+
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+            <input type="hidden" id="userRole" name="user_type" value="">
+
+            <div class="role-display">
+                <button type="button" class="back-btn" onclick="backToRoleSelection()">
+                    <i class='bx bx-arrow-back'></i> Change Role
+                </button>
+                <div class="selected-role">
+                    <i class='bx' id="roleIcon"></i>
+                    <span id="roleText"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="signup-username">Username *</label>
+                <input type="text" id="signup-username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="signup-email">Email *</label>
+                <input type="email" id="signup-email" name="email" required>
+            </div>
+
+            <div class="form-group display-none" id="companyNameGroup">
+
+                <label for="company-name">Company Name *</label>
+                <input type="text" id="company-name" name="company_name">
+            </div>
+
+            <div class="form-group">
+                <label for="signup-password">Password *</label>
+                <input type="password" id="signup-password" name="password" required>
+                <div class="password-strength" id="passwordStrength"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="signup-confirm">Confirm Password *</label>
+                <input type="password" id="signup-confirm" name="confirm_password" required>
+            </div>
+
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="terms" required>
+                <label for="terms">I agree to the <a href="#">Terms & Conditions</a> and <a href="#">Privacy
+                        Policy</a></label>
+            </div>
+
+            <button type="submit" class="submit-btn" id="signupSubmitBtn">Create Account</button>
+
+            <div class="auth-divider">
+                <span>OR</span>
+            </div>
+
+            <div class="google-signin-wrapper">
+                <div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+                    data-callback="handleGoogleSignUpWithRole" data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline"
+                    data-text="signup_with" data-shape="rectangular" data-logo_alignment="left" data-width="100%">
+                </div>
+            </div>
+
+            <p class="auth-switch">
+                Already have an account? <a href="{% url 'login' %}">Login</a>
+            </p>
+        </form>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}DominusoftJobs - Home{% endblock %}
+
+{% block content %}
+<header>
+    <div class="left">
+        <h2>Every profile a new opportunity.<br><span>DominusoftJobs </span>is the solution.</h2>
+        <p>Connecting businesses with top-tier students who deliver.</p>
+    </div>
+    <div class="right">
+        <img src="{% static 'Assets/Freelancer1.png' %}" alt="Student illustration">
+    </div>
+</header>
+
+<section class="advanced-search-section">
+    <div class="search-container">
+
+        <div class="search-type-toggle">
+            <button class="toggle-btn active" onclick="switchSearchType('jobs')" id="jobsToggle">
+                <i class='bx bx-briefcase'></i>
+                Find Jobs
+            </button>
+            <button class="toggle-btn" onclick="switchSearchType('students')" id="studentsToggle">
+                <i class='bx bx-user'></i>
+                Find Students
+            </button>
+        </div>
+
+        <div class="search-content" id="jobsSearch">
+            <h3>Find Your Next Opportunity</h3>
+            <p class="search-subtitle">Search thousands of jobs matching your skills</p>
+
+            <div class="main-search-bar">
+                <div class="search-input-group">
+                    <i class='bx bx-search'></i>
+                    <input type="text" id="jobSearchInput" placeholder="Job title, keywords, or company">
+                </div>
+                <div class="search-input-group location">
+                    <i class='bx bx-map'></i>
+                    <input type="text" id="jobLocationInput" placeholder="City, state, or remote">
+                </div>
+                <button class="search-submit-btn" onclick="performJobSearch()">
+                    Search Jobs
+                </button>
+            </div>
+
+            <div class="search-filters">
+                <button class="filter-toggle-btn" onclick="toggleFilters('jobs')">
+                    <i class='bx bx-filter'></i>
+                    Advanced Filters
+                    <i class='bx bx-chevron-down' id="jobsFilterIcon"></i>
+                </button>
+            </div>
+
+            <div class="filters-panel display-none" id="jobsFilters">
+
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label>Category</label>
+                        <select id="jobCategory">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Experience Level</label>
+                        <select id="jobExperience">
+                            <option value="">Any Level</option>
+                            {% for exp in experience_levels %}
+                            <option value="{{ exp.value }}">{{ exp.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Job Type</label>
+                        <select id="jobType">
+                            <option value="">All Types</option>
+                            {% for type in job_types %}
+                            <option value="{{ type.value }}">{{ type.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Work Location</label>
+                        <select id="jobWorkLocation">
+                            <option value="">Any Location</option>
+                            {% for loc in work_locations %}
+                            <option value="{{ loc.value }}">{{ loc.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Posted Within</label>
+                        <select id="jobPosted">
+                            {% for post in posted_options %}
+                            <option value="{{ post.value }}">{{ post.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                {% for job in jobs %}
+                <div class="job-card">
+                    <div class="job-icon">
+                        <i class='bx {{ job.category.icon|default:"bx-briefcase" }}'></i>
+                    </div>
+                    <div class="job-details">
+                        <h4>{{ job.title }}</h4>
+                        <div class="job-meta">
+                            <span><i class='bx bx-building'></i> {{ job.company.username }}</span>
+                            <span><i class='bx bx-map'></i> {{ job.location }}</span>
+                            <span><i class='bx bx-time'></i> {{ job.job_type }}</span>
+                        </div>
+                        <p class="job-description">{{ job.description|truncatewords:20 }}</p>
+                        <div class="job-tags">
+                            <span>{{ job.category.name }}</span>
+                        </div>
+                        <div class="job-actions">
+                            <span class="salary">{{ job.salary_range }}</span>
+                            <button class="apply-btn">Apply Now</button>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p>No jobs available at the moment.</p>
+                {% endfor %}
+
+                <div class="filters-actions">
+                    <button class="clear-filters-btn" onclick="clearJobFilters()">
+                        Clear All
+                    </button>
+                    <button class="apply-filters-btn" onclick="applyJobFilters()">
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+
+            <div class="popular-searches">
+                <p>Popular:</p>
+                <div class="popular-tags">
+                    {% for category in categories|slice:":3" %}
+                    <a href="{% url 'jobs_list' %}?category={{ category.id }}">{{ category.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="search-content display-none" id="studentsSearch">
+
+            <h3>Find Top Talent</h3>
+            <p class="search-subtitle">Browse thousands of skilled students</p>
+
+            <div class="main-search-bar">
+                <div class="search-input-group">
+                    <i class='bx bx-search'></i>
+                    <input type="text" id="studentSearchInput" placeholder="Skills, name, or expertise">
+                </div>
+                <div class="search-input-group location">
+                    <i class='bx bx-map'></i>
+                    <input type="text" id="studentLocationInput" placeholder="City, state, or anywhere">
+                </div>
+                <button class="search-submit-btn" onclick="performStudentSearch()">
+                    Search
+                </button>
+            </div>
+
+            <div class="search-filters">
+                <button class="filter-toggle-btn" onclick="toggleFilters('students')">
+                    <i class='bx bx-filter'></i>
+                    Advanced Filters
+                    <i class='bx bx-chevron-down' id="studentsFilterIcon"></i>
+                </button>
+            </div>
+
+            <div class="filters-panel display-none" id="studentsFilters">
+
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label>Skills Category</label>
+                        <select id="studentCategory">
+                            <option value="">All Skills</option>
+                            <option value="web-development">Web Development</option>
+                            <option value="mobile-development">Mobile Development</option>
+                            <option value="design">Design & Creative</option>
+                            <option value="writing">Writing & Content</option>
+                            <option value="marketing">Marketing & Sales</option>
+                            <option value="data-science">Data Science</option>
+                            <option value="admin">Admin & Support</option>
+                            <option value="engineering">Engineering</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Experience Level</label>
+                        <select id="studentExperience">
+                            <option value="">Any Level</option>
+                            <option value="entry">Entry Level (0-2 years)</option>
+                            <option value="intermediate">Intermediate (2-5 years)</option>
+                            <option value="expert">Expert (5+ years)</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Availability</label>
+                        <select id="studentAvailability">
+                            <option value="">Any Availability</option>
+                            <option value="full-time">Full Time</option>
+                            <option value="part-time">Part Time</option>
+                            <option value="hourly">Hourly</option>
+                            <option value="project">Per Project</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filters-actions">
+                    <button class="clear-filters-btn" onclick="clearStudentFilters()">
+                        Clear All
+                    </button>
+                    <button class="apply-filters-btn" onclick="applyStudentFilters()">
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+
+            <div class="popular-searches">
+                <p>Popular:</p>
+                <div class="popular-tags">
+                    {% for category in categories|slice:":3" %}
+                    <a href="{% url 'students_list' %}?keyword={{ category.name }}">{{ category.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<section class="features">
+    <div class="feature-card">
+        <i class='bx bx-target-lock'></i>
+        <h3>Top Talent</h3>
+        <p>Access thousands of skilled students across various industries and expertise levels.</p>
+    </div>
+    <div class="feature-card">
+        <i class='bx bx-star'></i>
+        <h3>Quality Work</h3>
+        <p>Review ratings and portfolios to find the perfect match for your project.</p>
+    </div>
+</section>
+{% endblock %}
