@@ -8,15 +8,14 @@
     <div class="cv-header-content">
         <div class="cv-header-left">
             <div class="profile-avatar avatar-circle">
-                {% if user.profile.profile_picture %}
-                <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="avatar-img">
+                {% if viewed_user.profile.profile_picture %}
+                <img src="{{ viewed_user.profile.profile_picture.url }}" alt="Profile Picture" class="avatar-img">
                 {% else %}
                 <i class='bx bx-user avatar-icon'></i>
                 {% endif %}
             </div>
             <div>
-                <h2>My Profile</h2>
-                <p>{{ user.get_full_name|default:user.username }} ({{ user.email }})</p>
+                <p>{{ viewed_user.get_full_name|default:viewed_user.username }} ({{ viewed_user.email }})</p>
             </div>
         </div>
         <div class="cv-header-actions">
@@ -36,14 +35,19 @@
                     <i class='bx bx-home'></i>Overview
                 </a>
                 <a href="#" class="cv-nav-item" onclick="showProfileTab(event, 'cv')">
-                    <i class='bx bx-file'></i>My CV
+                    <i class='bx bx-file'></i>{% if is_own_profile %}My CV{% else %}CV Details{% endif %}
                 </a>
+                {% if is_own_profile %}
                 <a href="#" class="cv-nav-item" onclick="showProfileTab(event, 'applications')">
                     <i class='bx bx-briefcase'></i>My Applications
+                </a>
+                <a href="#" class="cv-nav-item" onclick="showProfileTab(event, 'projects')">
+                    <i class='bx bx-grid-alt'></i>{% if is_own_profile %}My Projects{% else %}Projects{% endif %}
                 </a>
                 <a href="#" class="cv-nav-item" onclick="showProfileTab(event, 'settings')">
                     <i class='bx bx-cog'></i>Settings
                 </a>
+                {% endif %}
             </div>
         </div>
 
@@ -64,7 +68,7 @@
                             <div>
                                 <h4 class="stats-title">CV Status</h4>
                                 <p class="stats-value">
-                                    {% if user.cv %}
+                                    {% if viewed_user.cv %}
                                     Active
                                     {% else %}
                                     Not Created
@@ -76,18 +80,29 @@
                             <i class='bx bx-briefcase stats-icon-box'></i>
                             <div>
                                 <h4 class="stats-title">Applications</h4>
-                                <p class="stats-value">0</p>
+                                <p class="stats-value">{{ applications.count }}</p>
                             </div>
                         </div>
                     </div>
 
+                    {% if is_own_profile %}
                     <div class="mt-30">
                         <h4 class="nav-card-title">Quick Actions</h4>
                         <div class="grid-auto-200">
-                            <button class="cv-btn cv-btn-primary w-full-center" data-url="{% url 'cv_builder' %}"
-                                onclick="location.href=this.getAttribute('data-url')">
+                            {% if viewed_user.profile.user_type == 'student' %}
+                            <form method="POST" enctype="multipart/form-data" id="quick-cv-form">
+                                {% csrf_token %}
+                                <label for="quick_cv_input" class="cv-btn cv-btn-primary w-full-center pointer">
+                                    <i class='bx bx-upload'></i> Upload CV to Auto-fill
+                                </label>
+                                <input type="file" name="cv_file" id="quick_cv_input" class="display-none"
+                                    onchange="this.form.submit()">
+                            </form>
+                            <button class="cv-btn cv-btn-primary-outline w-full-center"
+                                data-url="{% url 'cv_builder' %}" onclick="location.href=this.getAttribute('data-url')">
                                 <i class='bx bx-plus'></i>Build Your CV
                             </button>
+                            {% endif %}
                             <button class="cv-btn cv-btn-secondary w-full-center" data-url="{% url 'jobs_list' %}"
                                 onclick="location.href=this.getAttribute('data-url')">
                                 <i class='bx bx-search'></i>Find Jobs
@@ -98,6 +113,7 @@
                             </button>
                         </div>
                     </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -111,27 +127,61 @@
                         </div>
                     </div>
 
-                    {% if user.cv %}
+                    {% if viewed_user.cv %}
                     <div class="cv-item-card">
                         <div class="cv-item-header">
-                            <h4>{{ user.cv.title }}</h4>
-                            <button class="cv-btn cv-btn-primary" data-url="{% url 'cv_builder' %}"
-                                onclick="location.href=this.getAttribute('data-url')">
-                                <i class='bx bx-edit'></i>Edit
-                            </button>
+                            <h4>{{ viewed_user.cv.title }}</h4>
+                            {% if is_own_profile %}
+                            <div class="flex-gap-10">
+                                <form method="POST" enctype="multipart/form-data" class="inline-block">
+                                    {% csrf_token %}
+                                    <label for="cv_reupload" class="cv-btn cv-btn-secondary pointer">
+                                        <i class='bx bx-upload'></i> Replace CV
+                                    </label>
+                                    <input type="file" name="cv_file" id="cv_reupload" class="display-none"
+                                        onchange="this.form.submit()">
+                                </form>
+                                <button class="cv-btn cv-btn-primary" data-url="{% url 'cv_builder' %}"
+                                    onclick="location.href=this.getAttribute('data-url')">
+                                    <i class='bx bx-edit'></i>Edit Content
+                                </button>
+                            </div>
+                            {% endif %}
                         </div>
-                        <p class="empty-state-text lh-1-6">{{ user.cv.summary|truncatewords:50 }}</p>
-
+                        <p class="empty-state-text lh-1-6">{{ viewed_user.cv.summary|truncatewords:50 }}</p>
+                        {% if viewed_user.cv.resume_file %}
+                        <div class="mt-15">
+                            <a href="{{ viewed_user.cv.resume_file.url }}" target="_blank" class="cv-link">
+                                <i class='bx bx-download'></i> {% if is_own_profile %}Download Current CV{% else
+                                %}Download CV{% endif %}
+                            </a>
+                        </div>
+                        {% endif %}
                     </div>
                     {% else %}
                     <div class="empty-state-container">
                         <i class='bx bx-file-blank' class="empty-state-icon"></i>
                         <h3 class="mb-15">No CV Created Yet</h3>
-                        <p class="empty-state-text-mb">Create your professional CV to start applying for jobs</p>
-                        <button class="cv-btn cv-btn-primary" data-url="{% url 'cv_builder' %}"
-                            onclick="location.href=this.getAttribute('data-url')">
-                            <i class='bx bx-plus'></i>Create CV Now
-                        </button>
+                        {% if is_own_profile %}
+                        <p class="empty-state-text-mb">Upload your professional CV to auto-fill your profile, or create
+                            one from scratch.</p>
+                        <div class="flex-center gap-15">
+                            <form method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <label for="cv_upload_main" class="cv-btn cv-btn-primary pointer">
+                                    <i class='bx bx-upload'></i> Upload CV
+                                </label>
+                                <input type="file" name="cv_file" id="cv_upload_main" class="display-none"
+                                    onchange="this.form.submit()">
+                            </form>
+                            <button class="cv-btn cv-btn-primary-outline" data-url="{% url 'cv_builder' %}"
+                                onclick="location.href=this.getAttribute('data-url')">
+                                <i class='bx bx-plus'></i>Create From Scratch
+                            </button>
+                        </div>
+                        {% else %}
+                        <p class="empty-state-text-mb">This user haven't uploaded or created a CV yet.</p>
+                        {% endif %}
                     </div>
                     {% endif %}
                 </div>
@@ -139,6 +189,7 @@
 
             <div id="applicationsTab" class="profile-tab display-none">
 
+                {% if is_own_profile %}
                 <div class="cv-content-card">
                     <div class="cv-tab-header">
                         <div>
@@ -147,6 +198,40 @@
                         </div>
                     </div>
 
+                    {% if applications %}
+                    <div class="applications-list">
+                        <table class="table-full">
+                            <thead>
+                                <tr class="table-head-row">
+                                    <th class="table-cell">Job Title</th>
+                                    <th class="table-cell">Company</th>
+                                    <th class="table-cell">Date Applied</th>
+                                    <th class="table-cell">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for app in applications %}
+                                <tr class="table-row-bordered">
+                                    <td class="table-cell">{{ app.job.title }}</td>
+                                    <td class="table-cell">{{ app.job.company.username }}</td>
+                                    <td class="table-cell">{{ app.applied_at|date:"M d, Y" }}</td>
+                                    <td class="table-cell">
+                                        <span class="status-badge status-{{ app.status|lower }}">
+                                            {{ app.get_status_display }}
+                                        </span>
+                                        {% if app.resume_file %}
+                                        <a href="{{ app.resume_file.url }}" class="ms-2" target="_blank"
+                                            title="View CV">
+                                            <i class='bx bx-file-find'></i>
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
                     <div class="empty-state-container">
                         <i class='bx bx-briefcase-alt' class="empty-state-icon"></i>
                         <h3 class="mb-15">No Applications Yet</h3>
@@ -157,11 +242,77 @@
                             <i class='bx bx-search'></i>Browse Jobs
                         </button>
                     </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div id="projectsTab" class="profile-tab display-none">
+                <div class="cv-content-card">
+                    <div class="cv-tab-header">
+                        <div>
+                            <h3>Portfolio Showcase</h3>
+                            <p>Display your best work and projects</p>
+                        </div>
+                        {% if is_own_profile %}
+                        <button class="cv-btn cv-btn-primary" onclick="openProjectModal()">
+                            <i class='bx bx-plus'></i>Add Project
+                        </button>
+                        {% endif %}
+                    </div>
+
+                    {% if projects %}
+                    <div class="projects-grid mt-20">
+                        {% for project in projects %}
+                        <div class="project-card">
+                            <div class="project-card-header">
+                                <h4>{{ project.title }}</h4>
+                                {% if is_own_profile %}
+                                <div class="project-actions">
+                                    <a href="{% url 'delete_project' project.id %}" class="text-danger"
+                                        title="Delete Project" onclick="return confirm('Are you sure?')">
+                                        <i class='bx bx-trash'></i>
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <p class="project-description">{{ project.description }}</p>
+                            <div class="project-footer">
+                                <div class="project-links">
+                                    {% if project.github_link %}
+                                    <a href="{{ project.github_link }}" target="_blank" class="project-link">
+                                        <i class='bx bxl-github'></i> Github
+                                    </a>
+                                    {% endif %}
+                                    {% if project.live_link %}
+                                    <a href="{{ project.live_link }}" target="_blank" class="project-link">
+                                        <i class='bx bx-link-external'></i> Live
+                                    </a>
+                                    {% endif %}
+                                </div>
+                                <span class="project-date">{{ project.created_at|date:"M d, Y" }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state-container">
+                        <i class='bx bx-layer' style="font-size: 4rem; color: #ddd; margin-bottom: 1rem;"></i>
+                        <h3 class="mb-15">No Projects Yet</h3>
+                        <p class="empty-state-text-mb">{% if is_own_profile %}Share your amazing work with recruiters by
+                            adding your first project.{% else %}This user hasn't added any projects yet.{% endif %}</p>
+                        {% if is_own_profile %}
+                        <button class="cv-btn cv-btn-primary" onclick="openProjectModal()">
+                            <i class='bx bx-plus'></i>Add Your First Project
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
+            {% if is_own_profile %}
             <div id="settingsTab" class="profile-tab display-none">
-
                 <div class="cv-content-card">
                     <div class="cv-tab-header">
                         <div>
@@ -175,38 +326,39 @@
                         <div class="cv-form-grid">
                             <div class="cv-form-group">
                                 <label><i class='bx bx-user-circle'></i> Username</label>
-                                <input type="text" name="username" value="{{ user.username }}" placeholder="Username">
+                                <input type="text" name="username" value="{{ viewed_user.username }}"
+                                    placeholder="Username">
                             </div>
                             <div class="cv-form-group">
                                 <label><i class='bx bx-envelope'></i> Email Address</label>
-                                <input type="email" name="email" value="{{ user.email }}" readonly
+                                <input type="email" name="email" value="{{ viewed_user.email }}" readonly
                                     class="bg-light-blue">
                             </div>
                             <div class="cv-form-group">
                                 <label><i class='bx bx-user'></i> First Name</label>
-                                <input type="text" name="first_name" value="{{ user.first_name }}"
+                                <input type="text" name="first_name" value="{{ viewed_user.first_name }}"
                                     placeholder="First name">
                             </div>
                             <div class="cv-form-group">
                                 <label><i class='bx bx-user'></i> Last Name</label>
-                                <input type="text" name="last_name" value="{{ user.last_name }}"
+                                <input type="text" name="last_name" value="{{ viewed_user.last_name }}"
                                     placeholder="Last name">
                             </div>
-                            {% if user.profile.user_type == 'company' %}
+                            {% if viewed_user.profile.user_type == 'company' %}
                             <div class="cv-form-group">
                                 <label><i class='bx bx-building'></i> Company Name</label>
-                                <input type="text" name="company_name" value="{{ user.profile.company_name }}"
+                                <input type="text" name="company_name" value="{{ viewed_user.profile.company_name }}"
                                     placeholder="Company name">
                             </div>
                             {% endif %}
                             <div class="cv-form-group">
                                 <label><i class='bx bx-phone'></i> Phone Number</label>
-                                <input type="tel" name="phone" value="{{ user.profile.phone }}"
+                                <input type="tel" name="phone" value="{{ viewed_user.profile.phone }}"
                                     placeholder="+1 (555) 123-4567">
                             </div>
                             <div class="cv-form-group full-width">
                                 <label><i class='bx bx-map'></i> Location</label>
-                                <input type="text" name="location" value="{{ user.profile.location }}"
+                                <input type="text" name="location" value="{{ viewed_user.profile.location }}"
                                     placeholder="City, Country">
                             </div>
                         </div>
@@ -226,8 +378,47 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
 </div>
+</div>
+
+{% if is_own_profile %}
+<!-- Project Modal -->
+<div id="projectModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add New Project</h3>
+            <span class="close-modal" onclick="closeProjectModal()">&times;</span>
+        </div>
+        <form method="POST" action="{% url 'add_project' %}">
+            {% csrf_token %}
+            <div class="cv-form-group">
+                <label>Project Title *</label>
+                <input type="text" name="title" required placeholder="e.g. Portfolio Website">
+            </div>
+            <div class="cv-form-group">
+                <label>Description *</label>
+                <textarea name="description" rows="4" required placeholder="What did you build?"></textarea>
+            </div>
+            <div class="cv-form-grid">
+                <div class="cv-form-group">
+                    <label>GitHub Link</label>
+                    <input type="url" name="github_link" placeholder="https://github.com/...">
+                </div>
+                <div class="cv-form-group">
+                    <label>Live Demo Link</label>
+                    <input type="url" name="live_link" placeholder="https://...">
+                </div>
+            </div>
+            <div class="modal-footer mt-20">
+                <button type="button" class="cv-btn cv-btn-secondary" onclick="closeProjectModal()">Cancel</button>
+                <button type="submit" class="cv-btn cv-btn-primary">Add Project</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
 
 {% endblock %}

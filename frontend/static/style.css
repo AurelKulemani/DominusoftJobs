@@ -782,6 +782,90 @@ header .right img {
     gap: 30px;
 }
 
+/* Portfolio Showcase Styles */
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.project-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 20px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+.project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+.project-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.project-card-header h4 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #000;
+}
+
+.project-description {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    flex-grow: 1;
+}
+
+.project-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #f5f5f5;
+    padding-top: 15px;
+}
+
+.project-links {
+    display: flex;
+    gap: 15px;
+}
+
+.project-link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: #0f2182;
+    font-weight: 500;
+}
+
+.project-link:hover {
+    text-decoration: underline;
+}
+
+.project-date {
+    font-size: 12px;
+    color: #999;
+}
+
+/* Modal Backdrop */
+.modal-backdrop {
+    display: flex !important;
+    /* Force display flex for centered positioning */
+}
+
+.modal-backdrop.display-none {
+    display: none !important;
+}
+
 .info-item {
     background: #fff;
     padding: 25px;
@@ -2616,6 +2700,106 @@ header .right img {
 
 .job-apply-btn:hover {
     background: #0f2182;
+}
+
+.job-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.match-badge {
+    background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 4px 10px rgba(255, 140, 0, 0.3);
+    animation: matchGlow 2s infinite alternate;
+}
+
+@keyframes matchGlow {
+    from {
+        box-shadow: 0 0 5px rgba(255, 215, 0, 0.4);
+    }
+
+    to {
+        box-shadow: 0 0 15px rgba(255, 140, 0, 0.6);
+    }
+}
+
+.match-badge i {
+    font-size: 16px;
+}
+
+/* Mini Job Items (Dashboard) */
+.mb-30 {
+    margin-bottom: 30px;
+}
+
+.recommended-jobs-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.job-item-mini {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f8f9ff;
+    border-radius: 8px;
+    border-left: 4px solid #0f2182;
+    transition: transform 0.2s;
+}
+
+.job-item-mini:hover {
+    transform: translateX(5px);
+}
+
+.job-mini-info h4 {
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.job-mini-info p {
+    font-size: 13px;
+    color: #666;
+}
+
+.job-mini-meta {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.match-badge-mini {
+    font-size: 12px;
+    font-weight: 600;
+    color: #ff8c00;
+    background: rgba(255, 140, 0, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.btn-apply-mini {
+    padding: 6px 15px;
+    background: #0f2182;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.btn-apply-mini:hover {
+    background: #0d1a5f;
+    color: #fff;
 }
 
 .applications-list {
@@ -5327,6 +5511,8 @@ header .right img {
 }
 
 .student-actions .view-profile-btn {
+    display: block;
+    text-align: center;
     width: 100%;
     padding: 10px;
     background: #f1f1f1;

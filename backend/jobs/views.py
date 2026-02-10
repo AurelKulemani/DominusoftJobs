@@ -3,8 +3,9 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import Job, Category, CV, UserProfile, Application, ContactMessage
+from .models import Job, Category, CV, UserProfile, Application, ContactMessage, Project
 from .oauth import verify_google_token
+from .utils import extract_text_from_file, parse_cv_data, process_cv_and_update_profile, calculate_match_score, extract_skills
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
@@ -106,6 +107,21 @@ def jobs_list(request):
 
     filter_options = get_filter_options(job_type, experience, work_location, posted)
 
+    # Calculate match scores if user is a student
+    user_cv = None
+    if request.user.is_authenticated:
+        try:
+            if request.user.profile.user_type == 'student':
+                user_cv = CV.objects.filter(user=request.user).first()
+        except UserProfile.DoesNotExist:
+            pass
+
+    for job in jobs:
+        if user_cv and job.skills:
+            job.match_score = calculate_match_score(user_cv.skills, job.skills)
+        else:
+            job.match_score = None
+
     context = {
         'jobs': jobs,
         'categories': categories,
@@ -121,9 +137,31 @@ def jobs_list(request):
     return render(request, 'jobs.html', context)
 
 @login_required
-@login_required
-def profile(request):
+def profile(request, user_id=None):
+    from django.shortcuts import get_object_or_404
+    
+    if user_id:
+        viewed_user = get_object_or_404(User, id=user_id)
+        is_own_profile = (viewed_user == request.user)
+    else:
+        viewed_user = request.user
+        is_own_profile = True
+
     if request.method == 'POST':
+        if not is_own_profile:
+            messages.error(request, "You cannot edit someone else's profile.")
+            return redirect('public_profile', user_id=user_id)
+
+        # Handle CV Upload for auto-fill
+        if 'cv_file' in request.FILES:
+            cv_file = request.FILES.get('cv_file')
+            success, message = process_cv_and_update_profile(request.user, cv_file)
+            if success:
+                messages.success(request, message)
+            else:
+                messages.error(request, message)
+            return redirect('profile')
+
         username = request.POST.get('username')
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
@@ -137,7 +175,11 @@ def profile(request):
         if username and username != user.username:
             if User.objects.filter(username=username).exists():
                 messages.error(request, f"Username '{username}' is already taken.")
-                return render(request, 'profile.html')
+                return render(request, 'profile.html', {
+                    'viewed_user': viewed_user, 
+                    'is_own_profile': is_own_profile,
+                    'projects': viewed_user.projects.all().order_by('-created_at')
+                })
             user.username = username
 
         user.first_name = first_name
@@ -154,7 +196,15 @@ def profile(request):
         messages.success(request, "Profile updated successfully!")
         return redirect('profile')
 
-    return render(request, 'profile.html')
+    projects = viewed_user.projects.all().order_by('-created_at')
+    applications = Application.objects.filter(student=viewed_user).order_by('-applied_at')
+
+    return render(request, 'profile.html', {
+        'viewed_user': viewed_user, 
+        'is_own_profile': is_own_profile,
+        'projects': projects,
+        'applications': applications
+    })
 
 @login_required
 def cv_builder(request):
@@ -173,16 +223,36 @@ def cv_builder(request):
 def student_dashboard(request):
     if request.method == 'POST' and 'cv_file' in request.FILES:
         cv_file = request.FILES.get('cv_file')
-        cv, created = CV.objects.get_or_create(user=request.user)
-        cv.resume_file = cv_file
-        if not cv.title:
-            cv.title = f"CV - {request.user.username}"
-        cv.save()
-        messages.success(request, "CV uploaded successfully!")
+        success, message = process_cv_and_update_profile(request.user, cv_file)
+        if success:
+            messages.success(request, message)
+        else:
+            messages.error(request, message)
         return redirect('student_dashboard')
 
     applications = Application.objects.filter(student=request.user).order_by('-applied_at')
-    return render(request, 'student-dashboard.html', {'applications': applications})
+    
+    # Get Recommended Jobs
+    user_cv = CV.objects.filter(user=request.user).first()
+    recommended_jobs = []
+    if user_cv and user_cv.skills:
+        # Get latest jobs and calculate match score
+        all_jobs = Job.objects.all().order_by('-created_at')[:10]
+        for job in all_jobs:
+            if job.skills:
+                score = calculate_match_score(user_cv.skills, job.skills)
+                if score >= 30: # Only show jobs with 30%+ match
+                    job.match_score = score
+                    recommended_jobs.append(job)
+        
+        # Sort by match score
+        recommended_jobs.sort(key=lambda x: x.match_score, reverse=True)
+    
+    context = {
+        'applications': applications,
+        'recommended_jobs': recommended_jobs[:3] # Show top 3
+    }
+    return render(request, 'student-dashboard.html', context)
 
 @login_required
 def company_dashboard(request):
@@ -217,8 +287,8 @@ def apply_job(request, job_id):
     from django.urls import reverse
 
     if not request.user.is_authenticated:
-        messages.info(request, "Please create an account to apply for jobs.")
-        return redirect(f"{reverse('signup')}?next={request.path}")
+        messages.info(request, "Please log in to apply for jobs.")
+        return redirect(f"{reverse('login')}?next={request.path}")
 
     job = get_object_or_404(Job, id=job_id)
 
@@ -296,6 +366,16 @@ def view_applicants(request, job_id):
         app.is_reviewed = app.status == 'reviewed'
         app.is_accepted = app.status == 'accepted'
         app.is_rejected = app.status == 'rejected'
+        
+        # Calculate match score for applicant
+        try:
+            student_cv = CV.objects.get(user=app.student)
+            if student_cv.skills and job.skills:
+                app.match_score = calculate_match_score(student_cv.skills, job.skills)
+            else:
+                app.match_score = 0
+        except CV.DoesNotExist:
+            app.match_score = 0
 
     return render(request, 'applicants.html', {'job': job, 'applicants': applicants})
 
@@ -335,7 +415,8 @@ def post_job(request):
                     job_type=job_type,
                     location=location,
                     salary_range=salary_range,
-                    description=description
+                    description=description,
+                    skills=", ".join(extract_skills(description))
                 )
                 messages.success(request, f"Job '{title}' posted successfully!")
                 return redirect('company_dashboard')
@@ -468,6 +549,7 @@ def signup_view(request):
     return render(request, 'signup.html', {'next': next_url})
 
 def login_view(request):
+    next_url = request.POST.get('next') or request.GET.get('next')
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -475,6 +557,10 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
+            
+            if next_url:
+                return redirect(next_url)
+                
             try:
                 profile = user.profile
                 if profile.user_type == 'company':
@@ -484,9 +570,9 @@ def login_view(request):
                 return redirect('index')
         else:
             messages.error(request, "Invalid username or password")
-            return render(request, 'login.html')
+            return render(request, 'login.html', {'next': next_url})
 
-    return render(request, 'login.html')
+    return render(request, 'login.html', {'next': next_url})
 
 def logout_view(request):
     logout(request)
@@ -545,3 +631,33 @@ def google_login_backend(request):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
     return JsonResponse({'status': 'error', 'message': 'Only POST allowed'}, status=405)
+
+@login_required
+def add_project(request):
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        github_link = request.POST.get('github_link')
+        live_link = request.POST.get('live_link')
+
+        if title and description:
+            Project.objects.create(
+                user=request.user,
+                title=title,
+                description=description,
+                github_link=github_link,
+                live_link=live_link
+            )
+            messages.success(request, "Project added successfully!")
+        else:
+            messages.error(request, "Title and description are required.")
+    
+    return redirect('profile')
+
+@login_required
+def delete_project(request, project_id):
+    from django.shortcuts import get_object_or_404
+    project = get_object_or_404(Project, id=project_id, user=request.user)
+    project.delete()
+    messages.success(request, "Project deleted successfully!")
+    return redirect('profile')

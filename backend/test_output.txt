@@ -1,0 +1,966 @@
+﻿python : Creating 
+test database for 
+alias 'default'...
+At line:1 char:1
++ python manage.py 
+test 
+jobs.test_portfolio 
+2>&1 | Out-File 
+-FilePath t ...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (Creatin   
+ g test d...as 'd    
+efault'...:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+
+EEE
+=====================
+=====================
+=====================
+=======
+ERROR: 
+test_add_project (job
+s.test_portfolio.Port
+folioShowcaseTest.tes
+t_add_project)
+---------------------
+---------------------
+---------------------
+-------
+Traceback (most 
+recent call last):
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\utils
+.py", line 105, in 
+_execute
+    return self.curso
+r.execute(sql, 
+params)
+           ~~~~~~~~~~
+~~~~~~~~~^^^^^^^^^^^^
+^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\sqlit
+e3\base.py", line 
+359, in execute
+    return super().ex
+ecute(query, params)
+           ~~~~~~~~~~
+~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalEr
+ror: no such table: 
+jobs_project
+
+The above exception 
+was the direct cause 
+of the following 
+exception:
+
+Traceback (most 
+recent call last):
+  File "C:\Users\kule
+m\OneDrive\Desktop\Do
+miJobs\backend\jobs\t
+est_portfolio.py", 
+line 20, in 
+test_add_project
+    response = self.c
+lient.post(url, data)
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\test\client.py", 
+line 1153, in post
+    response = 
+super().post(
+        path,
+    ...<5 lines>...
+        **extra,
+    )
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\test\client.py", 
+line 499, in post
+    return 
+self.generic(
+           
+~~~~~~~~~~~~^
+        "POST",
+        ^^^^^^^
+    ...<6 lines>...
+        **extra,
+        ^^^^^^^^
+    )
+    ^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\test\client.py", 
+line 671, in generic
+    return 
+self.request(**r)
+           
+~~~~~~~~~~~~^^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\test\client.py", 
+line 1087, in request
+    self.check_except
+ion(response)
+    ~~~~~~~~~~~~~~~~~
+~~~^^^^^^^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\test\client.py", 
+line 802, in 
+check_exception
+    raise exc_value
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\core\handlers\exc
+eption.py", line 55, 
+in inner
+    response = 
+get_response(request)
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\core\handlers\bas
+e.py", line 198, in 
+_get_response
+    response = wrappe
+d_callback(request, 
+*callback_args, 
+**callback_kwargs)
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\contrib\auth\deco
+rators.py", line 59, 
+in _view_wrapper
+    return 
+view_func(request, 
+*args, **kwargs)
+  File "C:\Users\kule
+m\OneDrive\Desktop\Do
+miJobs\backend\jobs\v
+iews.py", line 641, 
+in add_project
+    Project.objects.c
+reate(
+    ~~~~~~~~~~~~~~~~~
+~~~~~^
+        
+user=request.user,
+        
+^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        
+live_link=live_link
+        
+^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\manager
+.py", line 87, in 
+manager_method
+    return getattr(se
+lf.get_queryset(), 
+name)(*args, 
+**kwargs)
+           ~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\query.p
+y", line 669, in 
+create
+    obj.save(force_in
+sert=True, 
+using=self.db)
+    ~~~~~~~~^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
+^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\base.py
+", line 874, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields
+=update_fields,
+        ^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\base.py
+", line 966, in 
+save_base
+    updated = 
+self._save_table(
+        raw,
+    ...<4 lines>...
+        
+update_fields,
+    )
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\base.py
+", line 1167, in 
+_save_table
+    results = 
+self._do_insert(
+        
+cls._base_manager, 
+using, 
+insert_fields, 
+returning_fields, raw
+    )
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\base.py
+", line 1218, in 
+_do_insert
+    return 
+manager._insert(
+           
+~~~~~~~~~~~~~~~^
+        [self],
+        ^^^^^^^
+    ...<3 lines>...
+        raw=raw,
+        ^^^^^^^^
+    )
+    ^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\manager
+.py", line 87, in 
+manager_method
+    return getattr(se
+lf.get_queryset(), 
+name)(*args, 
+**kwargs)
+           ~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\query.p
+y", line 1918, in 
+_insert
+    return query.get_
+compiler(using=using)
+.execute_sql(returnin
+g_fields)
+           ~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~^^^^^^^^^
+^^^^^^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\sql\com
+piler.py", line 
+1925, in execute_sql
+    
+cursor.execute(sql, 
+params)
+    ~~~~~~~~~~~~~~^^^
+^^^^^^^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\utils
+.py", line 79, in 
+execute
+    return self._exec
+ute_with_wrappers(
+           ~~~~~~~~~~
+~~~~~~~~~~~~~~~~~^
+        sql, params, 
+many=False, executor=
+self._execute
+        ^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\utils
+.py", line 92, in _ex
+ecute_with_wrappers
+    return 
+executor(sql, 
+params, many, 
+context)
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\utils
+.py", line 100, in 
+_execute
+    with self.db.wrap
+_database_errors:
+         ^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\utils.py", 
+line 94, in __exit__
+    raise dj_exc_valu
+e.with_traceback(trac
+eback) from exc_value
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\utils
+.py", line 105, in 
+_execute
+    return self.curso
+r.execute(sql, 
+params)
+           ~~~~~~~~~~
+~~~~~~~~~^^^^^^^^^^^^
+^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\sqlit
+e3\base.py", line 
+359, in execute
+    return super().ex
+ecute(query, params)
+           ~~~~~~~~~~
+~~~~~^^^^^^^^^^^^^^^
+django.db.utils.Opera
+tionalError: no such 
+table: jobs_project
+
+=====================
+=====================
+=====================
+=======
+ERROR: 
+test_delete_project (
+jobs.test_portfolio.P
+ortfolioShowcaseTest.
+test_delete_project)
+---------------------
+---------------------
+---------------------
+-------
+Traceback (most 
+recent call last):
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\utils
+.py", line 105, in 
+_execute
+    return self.curso
+r.execute(sql, 
+params)
+           ~~~~~~~~~~
+~~~~~~~~~^^^^^^^^^^^^
+^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\sqlit
+e3\base.py", line 
+359, in execute
+    return super().ex
+ecute(query, params)
+           ~~~~~~~~~~
+~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalEr
+ror: no such table: 
+jobs_project
+
+The above exception 
+was the direct cause 
+of the following 
+exception:
+
+Traceback (most 
+recent call last):
+  File "C:\Users\kule
+m\OneDrive\Desktop\Do
+miJobs\backend\jobs\t
+est_portfolio.py", 
+line 28, in 
+test_delete_project
+    project = Project
+.objects.create(
+        
+user=self.user,
+        
+title='Delete Me',
+        
+description='Delete 
+Description'
+    )
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\manager
+.py", line 87, in 
+manager_method
+    return getattr(se
+lf.get_queryset(), 
+name)(*args, 
+**kwargs)
+           ~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\query.p
+y", line 669, in 
+create
+    obj.save(force_in
+sert=True, 
+using=self.db)
+    ~~~~~~~~^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
+^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\base.py
+", line 874, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields
+=update_fields,
+        ^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\base.py
+", line 966, in 
+save_base
+    updated = 
+self._save_table(
+        raw,
+    ...<4 lines>...
+        
+update_fields,
+    )
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\base.py
+", line 1167, in 
+_save_table
+    results = 
+self._do_insert(
+        
+cls._base_manager, 
+using, 
+insert_fields, 
+returning_fields, raw
+    )
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\base.py
+", line 1218, in 
+_do_insert
+    return 
+manager._insert(
+           
+~~~~~~~~~~~~~~~^
+        [self],
+        ^^^^^^^
+    ...<3 lines>...
+        raw=raw,
+        ^^^^^^^^
+    )
+    ^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\manager
+.py", line 87, in 
+manager_method
+    return getattr(se
+lf.get_queryset(), 
+name)(*args, 
+**kwargs)
+           ~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\query.p
+y", line 1918, in 
+_insert
+    return query.get_
+compiler(using=using)
+.execute_sql(returnin
+g_fields)
+           ~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~^^^^^^^^^
+^^^^^^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\sql\com
+piler.py", line 
+1925, in execute_sql
+    
+cursor.execute(sql, 
+params)
+    ~~~~~~~~~~~~~~^^^
+^^^^^^^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\utils
+.py", line 79, in 
+execute
+    return self._exec
+ute_with_wrappers(
+           ~~~~~~~~~~
+~~~~~~~~~~~~~~~~~^
+        sql, params, 
+many=False, executor=
+self._execute
+        ^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\utils
+.py", line 92, in _ex
+ecute_with_wrappers
+    return 
+executor(sql, 
+params, many, 
+context)
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\utils
+.py", line 100, in 
+_execute
+    with self.db.wrap
+_database_errors:
+         ^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\utils.py", 
+line 94, in __exit__
+    raise dj_exc_valu
+e.with_traceback(trac
+eback) from exc_value
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\utils
+.py", line 105, in 
+_execute
+    return self.curso
+r.execute(sql, 
+params)
+           ~~~~~~~~~~
+~~~~~~~~~^^^^^^^^^^^^
+^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\sqlit
+e3\base.py", line 
+359, in execute
+    return super().ex
+ecute(query, params)
+           ~~~~~~~~~~
+~~~~~^^^^^^^^^^^^^^^
+django.db.utils.Opera
+tionalError: no such 
+table: jobs_project
+
+=====================
+=====================
+=====================
+=======
+ERROR: test_unauthori
+zed_delete (jobs.test
+_portfolio.PortfolioS
+howcaseTest.test_unau
+thorized_delete)
+---------------------
+---------------------
+---------------------
+-------
+Traceback (most 
+recent call last):
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\utils
+.py", line 105, in 
+_execute
+    return self.curso
+r.execute(sql, 
+params)
+           ~~~~~~~~~~
+~~~~~~~~~^^^^^^^^^^^^
+^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\sqlit
+e3\base.py", line 
+359, in execute
+    return super().ex
+ecute(query, params)
+           ~~~~~~~~~~
+~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalEr
+ror: no such table: 
+jobs_project
+
+The above exception 
+was the direct cause 
+of the following 
+exception:
+
+Traceback (most 
+recent call last):
+  File "C:\Users\kule
+m\OneDrive\Desktop\Do
+miJobs\backend\jobs\t
+est_portfolio.py", 
+line 40, in test_unau
+thorized_delete
+    project = Project
+.objects.create(
+Found 3 test(s).
+System check identified no issues (0 silenced).
+        
+user=other_user,
+        title='Other 
+Project',
+        
+description='Other 
+Description'
+    )
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\manager
+.py", line 87, in 
+manager_method
+    return getattr(se
+lf.get_queryset(), 
+name)(*args, 
+**kwargs)
+           ~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\query.p
+y", line 669, in 
+create
+    obj.save(force_in
+sert=True, 
+using=self.db)
+    ~~~~~~~~^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
+^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\base.py
+", line 874, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields
+=update_fields,
+        ^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\base.py
+", line 966, in 
+save_base
+    updated = 
+self._save_table(
+        raw,
+    ...<4 lines>...
+        
+update_fields,
+    )
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\base.py
+", line 1167, in 
+_save_table
+    results = 
+self._do_insert(
+        
+cls._base_manager, 
+using, 
+insert_fields, 
+returning_fields, raw
+    )
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\base.py
+", line 1218, in 
+_do_insert
+    return 
+manager._insert(
+           
+~~~~~~~~~~~~~~~^
+        [self],
+        ^^^^^^^
+    ...<3 lines>...
+        raw=raw,
+        ^^^^^^^^
+    )
+    ^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\manager
+.py", line 87, in 
+manager_method
+    return getattr(se
+lf.get_queryset(), 
+name)(*args, 
+**kwargs)
+           ~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\query.p
+y", line 1918, in 
+_insert
+    return query.get_
+compiler(using=using)
+.execute_sql(returnin
+g_fields)
+           ~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~^^^^^^^^^
+^^^^^^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\models\sql\com
+piler.py", line 
+1925, in execute_sql
+    
+cursor.execute(sql, 
+params)
+    ~~~~~~~~~~~~~~^^^
+^^^^^^^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\utils
+.py", line 79, in 
+execute
+    return self._exec
+ute_with_wrappers(
+           ~~~~~~~~~~
+~~~~~~~~~~~~~~~~~^
+        sql, params, 
+many=False, executor=
+self._execute
+        ^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\utils
+.py", line 92, in _ex
+ecute_with_wrappers
+    return 
+executor(sql, 
+params, many, 
+context)
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\utils
+.py", line 100, in 
+_execute
+    with self.db.wrap
+_database_errors:
+         ^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\utils.py", 
+line 94, in __exit__
+    raise dj_exc_valu
+e.with_traceback(trac
+eback) from exc_value
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\utils
+.py", line 105, in 
+_execute
+    return self.curso
+r.execute(sql, 
+params)
+           ~~~~~~~~~~
+~~~~~~~~~^^^^^^^^^^^^
+^
+  File "C:\Users\kule
+m\AppData\Local\Pytho
+n\pythoncore-3.14-64\
+Lib\site-packages\dja
+ngo\db\backends\sqlit
+e3\base.py", line 
+359, in execute
+    return super().ex
+ecute(query, params)
+           ~~~~~~~~~~
+~~~~~^^^^^^^^^^^^^^^
+django.db.utils.Opera
+tionalError: no such 
+table: jobs_project
+
+---------------------
+---------------------
+---------------------
+-------
+Ran 3 tests in 
+19.942s
+
+FAILED (errors=3)
+Destroying test 
+database for alias 
+'default'...
+

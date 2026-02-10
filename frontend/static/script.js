@@ -12,39 +12,6 @@ function handleContactSubmit(e) {
     e.target.reset();
 }
 
-function handleLogin(e) {
-    e.preventDefault();
-    const email = document.getElementById('login-email').value;
-
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-
-    if (currentUser && currentUser.email === email && currentUser.role === 'company') {
-        alert(`Welcome back! Logging in as ${email}`);
-        window.location.href = '/company-dashboard/';
-    } else {
-
-        alert(`Welcome back! Logging in as ${email}`);
-        window.location.href = '/student-dashboard/';
-    }
-
-    e.target.reset();
-}
-
-function handleSignup(e) {
-    e.preventDefault();
-    const name = document.getElementById('signup-name').value;
-    const password = document.getElementById('signup-password').value;
-    const confirm = document.getElementById('signup-confirm').value;
-
-    if (password !== confirm) {
-        alert('Passwords do not match!');
-        return;
-    }
-
-    alert(`Welcome to Dominusoft, ${name}! Your account has been created.`);
-    e.target.reset();
-}
-
 function handleGoogleSignIn(response) {
     console.log('Google Sign-In Response received, sending to backend...');
 
@@ -377,38 +344,6 @@ function addCertification() {
     certificationList.appendChild(certItem);
 }
 
-function handleLogin(e) {
-    e.preventDefault();
-    const email = document.getElementById('login-email').value;
-
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-
-    if (currentUser && currentUser.email === email && currentUser.role === 'company') {
-        alert(`Welcome back! Logging in as ${email}`);
-        window.location.href = '/company-dashboard/';
-    } else {
-
-        alert(`Welcome back! Logging in as ${email}`);
-        window.location.href = '/student-dashboard/';
-    }
-
-    e.target.reset();
-}
-
-function handleSignup(e) {
-    e.preventDefault();
-    const name = document.getElementById('signup-name').value;
-    const password = document.getElementById('signup-password').value;
-    const confirm = document.getElementById('signup-confirm').value;
-
-    if (password !== confirm) {
-        alert('Passwords do not match!');
-        return;
-    }
-
-    alert(`Welcome to Dominusoft, ${name}! Your account has been created.`);
-    e.target.reset();
-}
 
 function removeCertification(id) {
     const element = document.getElementById(`certification-${id}`);
@@ -1910,7 +1845,7 @@ window.addEventListener('click', function (event) {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-    const cvRadios = document.querySelectorAll('input[name=" cv_source\]');
+    const cvRadios = document.querySelectorAll('input[name="cv_source"]');
     if (cvRadios.length > 0) {
         cvRadios.forEach(radio => {
             radio.addEventListener('change', function () {
@@ -1960,6 +1895,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+function openProjectModal() {
+    const modal = document.getElementById('projectModal');
+    if (modal) {
+        modal.classList.add('active');
+    }
+}
+
+function closeProjectModal() {
+    const modal = document.getElementById('projectModal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+function deleteAccount() {
+    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+        alert('Account deletion feature coming soon!');
+    }
+}
+
+window.addEventListener('click', function (event) {
+    const projectModal = document.getElementById('projectModal');
+    const applicationModal = document.getElementById('applicationModal');
+    const newMessageModal = document.getElementById('newMessageModal');
+
+    if (event.target === projectModal) {
+        closeProjectModal();
+    }
+    if (event.target === applicationModal) {
+        closeApplicationModal();
+    }
+    if (event.target === newMessageModal) {
+        closeNewMessage();
+    }
+});
+
 function showProfileTab(event, tabId) {
     if (event) event.preventDefault();
 
@@ -1981,7 +1952,6 @@ function showProfileTab(event, tabId) {
     if (event) {
         event.currentTarget.classList.add('active');
     } else {
-
         document.querySelectorAll('.cv-nav-item').forEach(item => {
             const onclick = item.getAttribute('onclick');
             if (onclick && onclick.includes(tabId)) {

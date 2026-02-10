@@ -65,8 +65,8 @@
                         <p class="text-xs text-center mb-5">OR</p>
                         <form method="POST" enctype="multipart/form-data">
                             {% csrf_token %}
-                            <label for="cv_file_input" class="cv-btn cv-btn-primary-outline w-full-center">
-                                <i class='bx bx-upload'></i> Upload CV
+                            <label for="cv_file_input" class="cv-btn cv-btn-primary-outline w-full-center pointer">
+                                <i class='bx bx-upload'></i> Upload CV to Auto-fill
                             </label>
                             <input type="file" name="cv_file" id="cv_file_input" class="display-none"
                                 onchange="this.form.submit()">
@@ -102,6 +102,31 @@
                     </div>
                 </div>
             </div>
+
+            {% if recommended_jobs %}
+            <div class="cv-content-card mb-30">
+                <div class="cv-tab-header">
+                    <div>
+                        <h3><i class='bx bxs-zap' style="color: #ffd700;"></i> Recommended Jobs</h3>
+                        <p>Based on your skills and experience</p>
+                    </div>
+                </div>
+                <div class="recommended-jobs-grid">
+                    {% for job in recommended_jobs %}
+                    <div class="job-item-mini">
+                        <div class="job-mini-info">
+                            <h4>{{ job.title }}</h4>
+                            <p>{{ job.company.username }}</p>
+                        </div>
+                        <div class="job-mini-meta">
+                            <span class="match-badge-mini">{{ job.match_score }}% Match</span>
+                            <a href="{% url 'apply_job' job.id %}" class="btn-apply-mini">Apply</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
 
             <div class="cv-content-card">
                 <div class="cv-tab-header">
@@ -155,5 +180,4 @@
             </div>
         </div>
     </div>
-</div>
-{% endblock %}
+    {% endblock %}

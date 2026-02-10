@@ -67,7 +67,7 @@
                 </div>
                 <p class="student-summary">{{ profile.user.cv.summary|truncatewords:25 }}</p>
                 <div class="student-actions">
-                    <button class="view-profile-btn" onclick="location.href='#'">View Profile</button>
+                    <a href="{% url 'public_profile' profile.user.id %}" class="view-profile-btn">View Profile</a>
                 </div>
             </div>
             {% empty %}

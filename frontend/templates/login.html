@@ -20,6 +20,7 @@
         {% endif %}
         <form id="loginForm" method="POST" action="{% url 'login' %}">
             {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.GET.next }}">
             <div class="form-group">
                 <label for="login-username">Username</label>
                 <input type="text" id="login-username" name="username" required>

@@ -1,0 +1,38 @@
+﻿python : Creating 
+test database for 
+alias 'default'...
+At line:1 char:1
++ python manage.py 
+test 
+jobs.test_portfolio 
+2>&1 | Out-File 
+-FilePath t ...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (Creatin   
+ g test d...as 'd    
+efault'...:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+
+...
+---------------------
+---------------------
+---------------------
+-------
+Ran 3 tests in 9.049s
+
+OK
+Destroying test 
+database for alias 
+'default'...
+
+Found 3 test(s).
+System check identified no issues (0 silenced).

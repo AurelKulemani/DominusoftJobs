@@ -123,17 +123,20 @@
             <div class="job-info">
                 <h4>{{ job.title }}</h4>
                 <p class="job-company">{{ job.company.username }}</p>
-                <div class="job-tags">
-                    <span>{{ job.category.name }}</span>
-                    <span>{{ job.location }}</span>
-                    <span>{{ job.job_type }}</span>
-                </div>
             </div>
+        </div>
+        <div class="job-actions">
+            {% if job.match_score %}
+            <div class="match-badge" title="Matching score based on your skills">
+                <i class='bx bxs-zap'></i> {{ job.match_score }}% Match
+            </div>
+            {% endif %}
             <a href="{% url 'apply_job' job.id %}" class="job-apply-btn job-apply-link">Apply Now</a>
         </div>
-        {% empty %}
-        <p>No jobs found matching your criteria.</p>
-        {% endfor %}
+    </div>
+    {% empty %}
+    <p>No jobs found matching your criteria.</p>
+    {% endfor %}
     </div>
 </section>
 {% endblock %}

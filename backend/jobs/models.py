@@ -24,6 +24,7 @@ class CV(models.Model):
     linkedin = models.URLField(blank=True, null=True)
     github = models.URLField(blank=True, null=True)
     resume_file = models.FileField(upload_to='resumes/', blank=True, null=True)
+    skills = models.TextField(blank=True, null=True, help_text="Comma-separated skills extracted from CV")
 
     def __str__(self):
         return f"CV of {self.user.username}"
@@ -43,6 +44,7 @@ class Job(models.Model):
     location = models.CharField(max_length=100)
     salary_range = models.CharField(max_length=100, blank=True, null=True)
     job_type = models.CharField(max_length=50)
+    skills = models.TextField(blank=True, null=True, help_text="Comma-separated skills required for this job")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -73,3 +75,14 @@ class ContactMessage(models.Model):
 
     def __str__(self):
         return f"Message from {self.name} - {self.subject}"
+
+class Project(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='projects')
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    github_link = models.URLField(blank=True, null=True)
+    live_link = models.URLField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} - {self.user.username}"
