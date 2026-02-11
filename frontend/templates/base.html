@@ -20,13 +20,13 @@
         </div>
         <div class="links" id="navLinks">
             <a href="{% url 'index' %}"
-                class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">Home</a>
+                class="{% if request.resolver_match and request.resolver_match.url_name == 'index' %}active{% endif %}">Home</a>
             <a href="{% url 'about' %}"
-                class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">About Us</a>
+                class="{% if request.resolver_match and request.resolver_match.url_name == 'about' %}active{% endif %}">About Us</a>
             <a href="{% url 'contact' %}"
-                class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact</a>
+                class="{% if request.resolver_match and request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact</a>
             <a href="{% url 'jobs_list' %}"
-                class="{% if request.resolver_match.url_name == 'jobs_list' %}active{% endif %}">Find Work</a>
+                class="{% if request.resolver_match and request.resolver_match.url_name == 'jobs_list' %}active{% endif %}">Find Work</a>
         </div>
         <div class="login">
             {% if user.is_authenticated %}

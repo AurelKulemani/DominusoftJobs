@@ -11,6 +11,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.utils import timezone
 from datetime import timedelta
+import os
+from django.conf import settings
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from django.http import HttpResponse
 
 def index(request):
     jobs = Job.objects.all().order_by('-created_at')[:6]
@@ -199,11 +204,34 @@ def profile(request, user_id=None):
     projects = viewed_user.projects.all().order_by('-created_at')
     applications = Application.objects.filter(student=viewed_user).order_by('-applied_at')
 
+    # Pre-process skills and experiences for the overview tab
+    user_skills = []
+    user_soft_skills = []
+    user_languages = []
+    user_experiences = []
+    
+    try:
+        if viewed_user.cv:
+            if viewed_user.cv.skills:
+                user_skills = [s.strip() for s in viewed_user.cv.skills.split(',') if s.strip()]
+            if viewed_user.cv.soft_skills:
+                user_soft_skills = [s.strip() for s in viewed_user.cv.soft_skills.split(',') if s.strip()]
+            if viewed_user.cv.languages:
+                user_languages = [s.strip() for s in viewed_user.cv.languages.split(',') if s.strip()]
+            
+            user_experiences = viewed_user.cv.experiences.all().order_by('-start_date')
+    except Exception:
+        pass
+
     return render(request, 'profile.html', {
         'viewed_user': viewed_user, 
         'is_own_profile': is_own_profile,
         'projects': projects,
-        'applications': applications
+        'applications': applications,
+        'user_skills': user_skills[:8], # Limit to top 8 for overview
+        'user_soft_skills': user_soft_skills[:8],
+        'user_languages': user_languages[:8],
+        'user_experiences': user_experiences
     })
 
 @login_required
@@ -449,7 +477,8 @@ def students_list(request):
             Q(user__first_name__icontains=keyword) |
             Q(user__last_name__icontains=keyword) |
             Q(user__cv__title__icontains=keyword) |
-            Q(user__cv__summary__icontains=keyword)
+            Q(user__cv__summary__icontains=keyword) |
+            Q(user__cv__skills__icontains=keyword)
         ).distinct()
 
     if location:
@@ -460,7 +489,8 @@ def students_list(request):
             category = Category.objects.get(id=selected_category_id)
             students = students.filter(
                 Q(user__cv__title__icontains=category.name) |
-                Q(user__cv__summary__icontains=category.name)
+                Q(user__cv__summary__icontains=category.name) |
+                Q(user__cv__skills__icontains=category.name)
             ).distinct()
         except Category.DoesNotExist:
             pass
@@ -518,6 +548,9 @@ def work(request):
 
 def signup_view(request):
     next_url = request.GET.get('next') or request.POST.get('next')
+    if next_url == 'None':
+        next_url = None
+    
     if request.method == 'POST':
         username = request.POST.get('username')
         email = request.POST.get('email')
@@ -550,6 +583,9 @@ def signup_view(request):
 
 def login_view(request):
     next_url = request.POST.get('next') or request.GET.get('next')
+    if next_url == 'None':
+        next_url = None
+        
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -655,9 +691,164 @@ def add_project(request):
     return redirect('profile')
 
 @login_required
+@csrf_exempt
+def save_cv_data(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            personal = data.get('personal', {})
+            skills = data.get('skills', {})
+            
+            user = request.user
+            
+            # Update User fields
+            if personal.get('firstName'):
+                user.first_name = personal.get('firstName')
+            if personal.get('lastName'):
+                user.last_name = personal.get('lastName')
+            user.save()
+            
+            # Update UserProfile
+            profile, _ = UserProfile.objects.get_or_create(user=user)
+            if personal.get('phone'):
+                profile.phone = personal.get('phone')
+            if personal.get('location'):
+                profile.location = personal.get('location')
+            if personal.get('website'):
+                profile.website = personal.get('website')
+            profile.save()
+            
+            # Update CV
+            cv, _ = CV.objects.get_or_create(user=user)
+            if personal.get('title'):
+                cv.title = personal.get('title')
+            if personal.get('summary'):
+                cv.summary = personal.get('summary')
+            if personal.get('linkedin'):
+                cv.linkedin = personal.get('linkedin')
+            if personal.get('github'):
+                cv.github = personal.get('github')
+                
+            # Update Skill categories separately
+            if skills.get('technical'):
+                cv.skills = ", ".join(sorted(list(set(skills.get('technical')))))
+            if skills.get('soft'):
+                cv.soft_skills = ", ".join(sorted(list(set(skills.get('soft')))))
+            if skills.get('languages'):
+                cv.languages = ", ".join(sorted(list(set(skills.get('languages')))))
+            
+            cv.save()
+            
+            # Handle Experience
+            experiences = data.get('experiences', [])
+            if experiences:
+                # Clear existing experiences if replacing
+                cv.experiences.all().delete()
+                for exp in experiences:
+                    from .models import Experience
+                    from datetime import datetime
+                    
+                    # Basic date parsing - adjust based on frontend format
+                    start_date = exp.get('startDate')
+                    end_date = exp.get('endDate')
+                    
+                    try:
+                        if start_date:
+                            if len(start_date) == 7: # YYYY-MM
+                                start_date = datetime.strptime(start_date, '%Y-%m').date()
+                            else:
+                                start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+                        
+                        if end_date:
+                            if len(end_date) == 7: # YYYY-MM
+                                end_date = datetime.strptime(end_date, '%Y-%m').date()
+                            else:
+                                end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+                        else:
+                            end_date = None
+                            
+                        Experience.objects.create(
+                            cv=cv,
+                            company=exp.get('company'),
+                            position=exp.get('position'),
+                            start_date=start_date,
+                            end_date=end_date,
+                            description=exp.get('description', '')
+                        )
+                    except Exception as e:
+                        print(f"Error saving experience: {e}")
+            
+            return JsonResponse({'status': 'success', 'message': 'CV data saved successfully!'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            
+    return JsonResponse({'status': 'error', 'message': 'Only POST allowed'}, status=405)
+
+@login_required
 def delete_project(request, project_id):
     from django.shortcuts import get_object_or_404
     project = get_object_or_404(Project, id=project_id, user=request.user)
     project.delete()
     messages.success(request, "Project deleted successfully!")
     return redirect('profile')
+
+def link_callback(uri, rel):
+    """
+    Convert HTML images to specific system paths for xhtml2pdf
+    """
+    # use short variable names
+    sUrl = settings.STATIC_URL      # Typically /static/
+    sRoot = settings.STATICFILES_DIRS[0] if settings.STATICFILES_DIRS else settings.STATIC_ROOT
+    mUrl = settings.MEDIA_URL       # Typically /media/
+    mRoot = settings.MEDIA_ROOT     # Typically /home/userX/project_static/media/
+
+    # convert URIs to absolute system paths
+    if uri.startswith(mUrl):
+        path = os.path.join(mRoot, uri.replace(mUrl, ""))
+    elif uri.startswith(sUrl):
+        path = os.path.join(sRoot, uri.replace(sUrl, ""))
+    else:
+        return uri
+
+    # make sure that file exists
+    if not os.path.isfile(path):
+        return uri
+    return path
+
+@login_required
+def download_cv_pdf(request):
+    try:
+        cv = request.user.cv
+    except CV.DoesNotExist:
+        messages.error(request, "Please create your CV first.")
+        return redirect('student_dashboard')
+
+    experiences = cv.experiences.all().order_by('-start_date')
+    
+    context = {
+        'user': request.user,
+        'cv': cv,
+        'experiences': experiences,
+        'skills_tech': cv.skills,
+        'skills_soft': cv.soft_skills,
+        'languages': cv.languages,
+    }
+
+    # Create a Django response object, and specify content_type as pdf
+    filename = f"{request.user.first_name or 'My'}_{request.user.last_name or 'CV'}_CV.pdf"
+    
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+    # find the template and render it.
+    template = get_template('cv_pdf.html')
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response, link_callback=link_callback)
+    
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response

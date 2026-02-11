@@ -63,6 +63,7 @@
                     </div>
 
                     <div class="cv-form-grid mt-20">
+                        <!-- Stats Cards -->
                         <div class="cv-item-card stats-card">
                             <i class='bx bx-file stats-icon-box'></i>
                             <div>
@@ -81,6 +82,118 @@
                             <div>
                                 <h4 class="stats-title">Applications</h4>
                                 <p class="stats-value">{{ applications.count }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overview-grid mt-30">
+                        <!-- Personal Info Card -->
+                        <div class="cv-content-card border-eee">
+                            <div class="cv-tab-header">
+                                <h4 class="nav-card-title m-0"><i class='bx bx-user-circle'></i> Personal Information
+                                </h4>
+                            </div>
+                            <div class="info-list mt-15">
+                                <div class="p-overview-item">
+                                    <span class="text-muted">Full Name</span>
+                                    <p class="m-0">{{ viewed_user.get_full_name|default:viewed_user.username }}</p>
+                                </div>
+                                <div class="p-overview-item">
+                                    <span class="text-muted">Email Address</span>
+                                    <p class="m-0">{{ viewed_user.email }}</p>
+                                </div>
+                                {% if viewed_user.profile.phone %}
+                                <div class="p-overview-item">
+                                    <span class="text-muted">Phone Number</span>
+                                    <p class="m-0">{{ viewed_user.profile.phone }}</p>
+                                </div>
+                                {% endif %}
+                                {% if viewed_user.profile.location %}
+                                <div class="p-overview-item">
+                                    <span class="text-muted">Location</span>
+                                    <p class="m-0">{{ viewed_user.profile.location }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Experience & Skills Card -->
+                        <div class="cv-content-card border-eee">
+                            <div class="cv-tab-header">
+                                <h4 class="nav-card-title m-0"><i class='bx bx-briefcase'></i> Professional Profile</h4>
+                            </div>
+                            <div class="info-list mt-15">
+                                <!-- Work Experience Section -->
+                                <div class="p-overview-item">
+                                    <span class="text-muted fw-600">Work Experience</span>
+                                    <div class="mt-10">
+                                        {% if user_experiences %}
+                                        {% for exp in user_experiences %}
+                                        <div class="mb-15 pb-10 {% if not forloop.last %}bb-1-eee{% endif %}">
+                                            <div class="flex-between">
+                                                <h5 class="m-0 text-primary">{{ exp.position }}</h5>
+                                                <span class="text-muted small">{{ exp.start_date|date:"M Y" }} - {% if exp.end_date %}{{ exp.end_date|date:"M Y" }}{% else %}Present{% endif %}</span>
+                                            </div>
+                                            <p class="m-0 small fw-500">{{ exp.company }}</p>
+                                            <p class="m-0 mt-5 small text-muted lh-1-4">{{                         exp.description|truncatewords:20 }}</p>
+                                        </div>
+                                        {% endfor %}
+                                        {% else %}
+                                        <p class="text-muted italic small">No work experience listed</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Skills Section -->
+                                <div class="p-overview-item mt-20">
+                                    <span class="text-muted fw-600">Technical Skills</span>
+                                    <div class="skill-tags mt-5">
+                                        {% if user_skills %}
+                                        {% for skill in user_skills %}
+                                        <span class="skill-badge-simple">{{ skill }}</span>
+                                        {% endfor %}
+                                        {% else %}
+                                        <p class="text-muted italic small">No technical skills listed</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="p-overview-item mt-15">
+                                    <span class="text-muted fw-600">Soft Skills</span>
+                                    <div class="skill-tags mt-5">
+                                        {% if user_soft_skills %}
+                                        {% for skill in user_soft_skills %}
+                                        <span class="skill-badge-simple bg-soft-green">{{ skill }}</span>
+                                        {% endfor %}
+                                        {% else %}
+                                        <p class="text-muted italic small">No soft skills listed</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="p-overview-item mt-15">
+                                    <span class="text-muted fw-600">Languages</span>
+                                    <div class="skill-tags mt-5">
+                                        {% if user_languages %}
+                                        {% for skill in user_languages %}
+                                        <span class="skill-badge-simple bg-soft-blue">{{ skill }}</span>
+                                        {% endfor %}
+                                        {% else %}
+                                        <p class="text-muted italic small">No languages listed</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="p-overview-item mt-20">
+                                    <span class="text-muted fw-600">About / Work Summary</span>
+                                    <p class="m-0 mt-5 small lh-1-6">
+                                        {% if viewed_user.cv.summary %}
+                                        {{ viewed_user.cv.summary }}
+                                        {% else %}
+                                        <span class="text-muted italic small">No summary provided</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -152,8 +265,7 @@
                         {% if viewed_user.cv.resume_file %}
                         <div class="mt-15">
                             <a href="{{ viewed_user.cv.resume_file.url }}" target="_blank" class="cv-link">
-                                <i class='bx bx-download'></i> {% if is_own_profile %}Download Current CV{% else
-                                %}Download CV{% endif %}
+                                <i class='bx bx-download'></i> {% if is_own_profile %}Download Current CV{% else                 %}Download CV{% endif %}
                             </a>
                         </div>
                         {% endif %}

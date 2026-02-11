@@ -100,3 +100,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'index'
 LOGOUT_REDIRECT_URL = 'index'
+
+# Session expires when the browser is closed
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True

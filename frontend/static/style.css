@@ -1188,6 +1188,61 @@ header .right img {
     border-color: #0f2182;
 }
 
+.skill-badge-simple {
+    display: inline-block;
+    padding: 4px 12px;
+    background-color: #f3f4f6;
+    color: #4b5563;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    transition: all 0.3s;
+}
+
+.skill-badge-simple:hover {
+    background-color: #e5e7eb;
+    color: #1f2937;
+}
+
+/* Helper Classes */
+.bg-soft-green {
+    background-color: #ecfdf5 !important;
+    color: #059669 !important;
+}
+
+.bg-soft-blue {
+    background-color: #eff6ff !important;
+    color: #2563eb !important;
+}
+
+.fw-600 {
+    font-weight: 600 !important;
+}
+
+.fw-500 {
+    font-weight: 500 !important;
+}
+
+.bb-1-eee {
+    border-bottom: 1px solid #eee !important;
+}
+
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+}
+
+.text-primary {
+    color: #0f2182 !important;
+}
+
+.lh-1-4 {
+    line-height: 1.4 !important;
+}
+
 .clear-filters {
     display: inline-flex;
     align-items: center;
@@ -5955,4 +6010,86 @@ header .right img {
 .btn-view-cv:hover {
     background: #e2e8f0;
     color: #1a202c;
+}
+
+/* Profile Overview Enhanced Styles */
+.border-eee {
+    border: 1px solid #eee;
+}
+
+.m-0 {
+    margin: 0;
+}
+
+.mt-5 {
+    margin-top: 5px;
+}
+
+.mt-15 {
+    margin-top: 15px;
+}
+
+.mb-10 {
+    margin-bottom: 10px;
+}
+
+.mb-15 {
+    margin-bottom: 15px;
+}
+
+.font-w-500 {
+    font-weight: 500;
+}
+
+.italic {
+    font-style: italic;
+}
+
+.small {
+    font-size: 13px;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.info-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.p-overview-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.text-muted {
+    color: #888;
+}
+
+.skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.skill-badge-simple {
+    background: #f0f2f5;
+    color: #4b4b4b;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid #e1e4e8;
+}
+
+.skill-badge-simple:hover {
+    background: #e1e4e8;
+    color: #0f2182;
 }

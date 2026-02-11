@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>CV Export</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 0.5in;
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11pt;
+            color: #333;
+            line-height: 1.4;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            color: #007bff;
+            font-size: 24pt;
+        }
+        .header h2 {
+            margin: 5px 0;
+            font-size: 16pt;
+            font-weight: normal;
+        }
+        .contact-info {
+            font-size: 10pt;
+            margin-top: 5px;
+        }
+        .section {
+            margin-bottom: 15px;
+        }
+        .section-title {
+            color: #007bff;
+            font-size: 14pt;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 3px;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .item {
+            margin-bottom: 10px;
+        }
+        .item-header {
+            margin-bottom: 3px;
+        }
+        .item-title {
+            font-weight: bold;
+            font-size: 12pt;
+        }
+        .item-company {
+            font-weight: bold;
+            color: #555;
+        }
+        .item-date {
+            float: right;
+            font-style: italic;
+            color: #777;
+        }
+        .item-description {
+            margin-top: 3px;
+            text-align: justify;
+        }
+        .skills-list {
+            margin: 0;
+            padding: 0;
+        }
+        .skill-group {
+            margin-bottom: 5px;
+        }
+        .skill-group-title {
+            font-weight: bold;
+        }
+        .profile-pic {
+            width: 100px;
+            height: 100px;
+            float: left;
+            margin-right: 15px;
+        }
+        .clear {
+            clear: both;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        {% if user.profile.profile_picture %}
+            <img src="{{ user.profile.profile_picture.path }}" class="profile-pic">
+        {% endif %}
+        <h1>{{ user.first_name }} {{ user.last_name }}</h1>
+        {% if cv.title %}<h2>{{ cv.title }}</h2>{% endif %}
+        
+        <div class="contact-info">
+            {{ user.email }}
+            {% if user.profile.phone %} | {{ user.profile.phone }}{% endif %}
+            {% if user.profile.location %} | {{ user.profile.location }}{% endif %}
+        </div>
+        
+        <div class="contact-info">
+            {% if cv.linkedin %}<a href="{{ cv.linkedin }}">LinkedIn</a>{% endif %}
+            {% if cv.github %}{% if cv.linkedin %} | {% endif %}<a href="{{ cv.github }}">GitHub</a>{% endif %}
+            {% if user.profile.website %}{% if cv.linkedin or cv.github %} | {% endif %}<a href="{{ user.profile.website }}">Website</a>{% endif %}
+        </div>
+        <div class="clear"></div>
+    </div>
+
+    {% if cv.summary %}
+    <div class="section">
+        <div class="section-title">Professional Summary</div>
+        <div class="item-description">{{ cv.summary }}</div>
+    </div>
+    {% endif %}
+
+    {% if experiences %}
+    <div class="section">
+        <div class="section-title">Work Experience</div>
+        {% for exp in experiences %}
+        <div class="item">
+            <div class="item-header">
+                <span class="item-date">{{ exp.start_date|date:"M Y" }} - {% if exp.end_date %}{{ exp.end_date|date:"M Y" }}{% else %}Present{% endif %}</span>
+                <div class="item-title">{{ exp.position }}</div>
+                <div class="item-company">{{ exp.company }}</div>
+            </div>
+            {% if exp.description %}
+            <div class="item-description">{{ exp.description }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if skills_tech or skills_soft or languages %}
+    <div class="section">
+        <div class="section-title">Skills</div>
+        {% if skills_tech %}
+        <div class="skill-group">
+            <span class="skill-group-title">Technical:</span> {{ skills_tech }}
+        </div>
+        {% endif %}
+        {% if skills_soft %}
+        <div class="skill-group">
+            <span class="skill-group-title">Soft Skills:</span> {{ skills_soft }}
+        </div>
+        {% endif %}
+        {% if languages %}
+        <div class="skill-group">
+            <span class="skill-group-title">Languages:</span> {{ languages }}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if user.projects.all %}
+    <div class="section">
+        <div class="section-title">Projects</div>
+        {% for project in user.projects.all %}
+        <div class="item">
+            <div class="item-title">{{ project.title }}</div>
+            {% if project.github_link or project.live_link %}
+            <div class="contact-info">
+                {% if project.github_link %}<a href="{{ project.github_link }}">GitHub</a>{% endif %}
+                {% if project.github_link and project.live_link %} | {% endif %}
+                {% if project.live_link %}<a href="{{ project.live_link }}">Live Demo</a>{% endif %}
+            </div>
+            {% endif %}
+            <div class="item-description">{{ project.description }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+</body>
+</html>

@@ -24,10 +24,23 @@ class CV(models.Model):
     linkedin = models.URLField(blank=True, null=True)
     github = models.URLField(blank=True, null=True)
     resume_file = models.FileField(upload_to='resumes/', blank=True, null=True)
-    skills = models.TextField(blank=True, null=True, help_text="Comma-separated skills extracted from CV")
+    skills = models.TextField(blank=True, null=True, help_text="Comma-separated technical skills")
+    soft_skills = models.TextField(blank=True, null=True, help_text="Comma-separated soft skills")
+    languages = models.TextField(blank=True, null=True, help_text="Comma-separated languages")
 
     def __str__(self):
         return f"CV of {self.user.username}"
+
+class Experience(models.Model):
+    cv = models.ForeignKey(CV, on_delete=models.CASCADE, related_name='experiences')
+    company = models.CharField(max_length=100)
+    position = models.CharField(max_length=100)
+    start_date = models.DateField()
+    end_date = models.DateField(blank=True, null=True)
+    description = models.TextField()
+
+    def __str__(self):
+        return f"{self.position} at {self.company}"
 
 class Category(models.Model):
     name = models.CharField(max_length=100)

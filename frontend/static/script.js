@@ -760,7 +760,27 @@ function saveCV() {
 
     localStorage.setItem('cvData', JSON.stringify(cvData));
 
-    alert('CV saved successfully!');
+    // Send to backend
+    fetch('/save-cv/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(cvData)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('CV saved successfully to server!');
+            } else {
+                alert('Error saving CV to server: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to save CV to server.');
+        });
 }
 
 function collectCVData() {
@@ -776,37 +796,101 @@ function collectCVData() {
         github: document.getElementById('cvGithub')?.value || '',
         summary: document.getElementById('cvSummary')?.value || ''
     };
+
+    // Collect Experiences
+    cvData.experiences = [];
+    for (let i = 1; i <= experienceCounter; i++) {
+        const title = document.getElementById(`expTitle-${i}`)?.value || '';
+        const company = document.getElementById(`expCompany-${i}`)?.value || '';
+        if (title || company) {
+            cvData.experiences.push({
+                position: title,
+                company: company,
+                startDate: document.getElementById(`expStartDate-${i}`)?.value || '',
+                endDate: document.getElementById(`expEndDate-${i}`)?.value || '',
+                current: document.getElementById(`expCurrent-${i}`)?.checked || false,
+                location: document.getElementById(`expLocation-${i}`)?.value || '',
+                description: document.getElementById(`expDescription-${i}`)?.value || ''
+            });
+        }
+    }
+
+    // Collect Education
+    cvData.education = [];
+    for (let i = 1; i <= educationCounter; i++) {
+        const degree = document.getElementById(`eduDegree-${i}`)?.value || '';
+        const institution = document.getElementById(`eduInstitution-${i}`)?.value || '';
+        if (degree || institution) {
+            cvData.education.push({
+                degree: degree,
+                field: document.getElementById(`eduField-${i}`)?.value || '',
+                institution: institution,
+                startDate: document.getElementById(`eduStartDate-${i}`)?.value || '',
+                endDate: document.getElementById(`eduEndDate-${i}`)?.value || '',
+                current: document.getElementById(`eduCurrent-${i}`)?.checked || false,
+                gpa: document.getElementById(`eduGPA-${i}`)?.value || '',
+                location: document.getElementById(`eduLocation-${i}`)?.value || ''
+            });
+        }
+    }
+
+    // Collect Skills
+    const extractSkillsFromList = (listId) => {
+        const list = document.getElementById(listId);
+        if (!list) return [];
+        return Array.from(list.querySelectorAll('.cv-skill-tag')).map(tag => {
+            // Get only the text content, excluding the 'x' icon
+            const clone = tag.cloneNode(true);
+            const icon = clone.querySelector('i');
+            if (icon) icon.remove();
+            return clone.textContent.trim();
+        });
+    };
+
+    cvData.skills = {
+        technical: extractSkillsFromList('technicalSkillsList'),
+        soft: extractSkillsFromList('softSkillsList'),
+        languages: extractSkillsFromList('languagesList')
+    };
+
+    // Collect Certifications
+    cvData.certifications = [];
+    for (let i = 1; i <= certificationCounter; i++) {
+        const name = document.getElementById(`certName-${i}`)?.value || '';
+        const org = document.getElementById(`certOrg-${i}`)?.value || '';
+        if (name || org) {
+            cvData.certifications.push({
+                name: name,
+                organization: org,
+                issueDate: document.getElementById(`certIssueDate-${i}`)?.value || '',
+                expiryDate: document.getElementById(`certExpDate-${i}`)?.value || '',
+                credentialId: document.getElementById(`certID-${i}`)?.value || ''
+            });
+        }
+    }
+
+    // Collect Projects
+    cvData.projects = [];
+    for (let i = 1; i <= projectCounter; i++) {
+        const name = document.getElementById(`projName-${i}`)?.value || '';
+        if (name) {
+            cvData.projects.push({
+                name: name,
+                role: document.getElementById(`projRole-${i}`)?.value || '',
+                startDate: document.getElementById(`projStartDate-${i}`)?.value || '',
+                endDate: document.getElementById(`projEndDate-${i}`)?.value || '',
+                url: document.getElementById(`projURL-${i}`)?.value || '',
+                description: document.getElementById(`projDescription-${i}`)?.value || ''
+            });
+        }
+    }
 }
 
 function downloadCV() {
-
-    const editMode = document.getElementById('cvEditMode');
-    if (editMode && editMode.style.display !== 'none') {
-        toggleCVPreview();
-    }
-
-    generatePreview();
-
-    const element = document.getElementById('cvPreviewContent');
-    if (!element) return;
-
-    const firstName = document.getElementById('cvFirstName')?.value || 'My';
-    const lastName = document.getElementById('cvLastName')?.value || 'CV';
-    const filename = `${firstName}_${lastName}_CV.pdf`;
-
-    const opt = {
-        margin: 0.5,
-        filename: filename,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    };
-
-    if (typeof html2pdf !== 'undefined') {
-        html2pdf().set(opt).from(element).save();
-    } else {
-        alert('PDF generation library not loaded. Please reload the page.');
-    }
+    // Save current data first to ensure latest changes are on the server
+    saveCV();
+    // Redirect to backend PDF generator
+    window.location.href = '/download-cv-pdf/';
 }
 
 window.addEventListener('DOMContentLoaded', function () {
@@ -818,27 +902,145 @@ window.addEventListener('DOMContentLoaded', function () {
 });
 
 function loadCVData() {
-    if (cvData.personal) {
-        const firstNameEl = document.getElementById('cvFirstName');
-        const lastNameEl = document.getElementById('cvLastName');
-        const titleEl = document.getElementById('cvTitle');
-        const emailEl = document.getElementById('cvEmail');
-        const phoneEl = document.getElementById('cvPhone');
-        const locationEl = document.getElementById('cvLocation');
-        const websiteEl = document.getElementById('cvWebsite');
-        const linkedinEl = document.getElementById('cvLinkedin');
-        const githubEl = document.getElementById('cvGithub');
-        const summaryEl = document.getElementById('cvSummary');
+    if (!cvData) return;
 
-        if (titleEl) titleEl.value = cvData.personal.title || '';
-        if (emailEl) emailEl.value = cvData.personal.email || '';
-        if (phoneEl) phoneEl.value = cvData.personal.phone || '';
-        if (locationEl) locationEl.value = cvData.personal.location || '';
-        if (websiteEl) websiteEl.value = cvData.personal.website || '';
-        if (linkedinEl) linkedinEl.value = cvData.personal.linkedin || '';
-        if (githubEl) githubEl.value = cvData.personal.github || '';
-        if (summaryEl) summaryEl.value = cvData.personal.summary || '';
+    if (cvData.personal) {
+        setVal('cvFirstName', cvData.personal.firstName);
+        setVal('cvLastName', cvData.personal.lastName);
+        setVal('cvTitle', cvData.personal.title);
+        setVal('cvEmail', cvData.personal.email);
+        setVal('cvPhone', cvData.personal.phone);
+        setVal('cvLocation', cvData.personal.location);
+        setVal('cvWebsite', cvData.personal.website);
+        setVal('cvLinkedin', cvData.personal.linkedin);
+        setVal('cvGithub', cvData.personal.github);
+        setVal('cvSummary', cvData.personal.summary);
     }
+
+    // Clear existing and load experiences
+    const expList = document.getElementById('experienceList');
+    if (expList) {
+        expList.innerHTML = '';
+        experienceCounter = 0;
+        if (cvData.experiences) {
+            cvData.experiences.forEach(exp => {
+                addExperience();
+                const i = experienceCounter;
+                setVal(`expTitle-${i}`, exp.position);
+                setVal(`expCompany-${i}`, exp.company);
+                setVal(`expStartDate-${i}`, exp.startDate);
+                setVal(`expEndDate-${i}`, exp.endDate);
+                const currentCheck = document.getElementById(`expCurrent-${i}`);
+                if (currentCheck) {
+                    currentCheck.checked = exp.current;
+                    toggleEndDate(i, 'exp');
+                }
+                setVal(`expLocation-${i}`, exp.location);
+                setVal(`expDescription-${i}`, exp.description);
+            });
+        }
+    }
+
+    // Load Education
+    const eduList = document.getElementById('educationList');
+    if (eduList) {
+        eduList.innerHTML = '';
+        educationCounter = 0;
+        if (cvData.education) {
+            cvData.education.forEach(edu => {
+                addEducation();
+                const i = educationCounter;
+                setVal(`eduDegree-${i}`, edu.degree);
+                setVal(`eduField-${i}`, edu.field);
+                setVal(`eduInstitution-${i}`, edu.institution);
+                setVal(`eduStartDate-${i}`, edu.startDate);
+                setVal(`eduEndDate-${i}`, edu.endDate);
+                const currentCheck = document.getElementById(`eduCurrent-${i}`);
+                if (currentCheck) {
+                    currentCheck.checked = edu.current;
+                    toggleEndDate(i, 'edu');
+                }
+                setVal(`eduGPA-${i}`, edu.gpa);
+                setVal(`eduLocation-${i}`, edu.location);
+            });
+        }
+    }
+
+    // Load Skills
+    if (cvData.skills) {
+        loadSkillsToList('technicalSkillsList', cvData.skills.technical);
+        loadSkillsToList('softSkillsList', cvData.skills.soft);
+        loadSkillsToList('languagesList', cvData.skills.languages);
+    }
+
+    // Load Certifications
+    const certList = document.getElementById('certificationList');
+    if (certList) {
+        certList.innerHTML = '';
+        certificationCounter = 0;
+        if (cvData.certifications) {
+            cvData.certifications.forEach(cert => {
+                addCertification();
+                const i = certificationCounter;
+                setVal(`certName-${i}`, cert.name);
+                setVal(`certOrg-${i}`, cert.organization);
+                setVal(`certIssueDate-${i}`, cert.issueDate);
+                setVal(`certExpDate-${i}`, cert.expiryDate);
+                setVal(`certID-${i}`, cert.credentialId);
+            });
+        }
+    }
+
+    // Load Projects
+    const projList = document.getElementById('projectList');
+    if (projList) {
+        projList.innerHTML = '';
+        projectCounter = 0;
+        if (cvData.projects) {
+            cvData.projects.forEach(proj => {
+                addProject();
+                const i = projectCounter;
+                setVal(`projName-${i}`, proj.name);
+                setVal(`projRole-${i}`, proj.role);
+                setVal(`projStartDate-${i}`, proj.startDate);
+                setVal(`projEndDate-${i}`, proj.endDate);
+                setVal(`projURL-${i}`, proj.url);
+                setVal(`projDescription-${i}`, proj.description);
+            });
+        }
+    }
+}
+
+function setVal(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.value = val || '';
+}
+
+function loadSkillsToList(listId, skills) {
+    const list = document.getElementById(listId);
+    if (!list || !skills) return;
+    list.innerHTML = '';
+    skills.forEach(skill => {
+        const skillTag = document.createElement('span');
+        skillTag.className = 'cv-skill-tag';
+        skillTag.innerHTML = `${skill} <i class='bx bx-x' onclick="this.parentElement.remove()"></i>`;
+        list.appendChild(skillTag);
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }
 
 function selectRole(role) {
@@ -1971,3 +2173,18 @@ window.addEventListener('load', () => {
         }
     }
 });
+// Helper to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
