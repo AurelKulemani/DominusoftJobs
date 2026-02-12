@@ -1,0 +1,118 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div style="display: flex; gap: 20px; margin: 20px 0; padding: 0 10px; align-items: stretch;">
+    <div
+        style="flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; flex-direction: column;">
+        <canvas id="categoryChart"></canvas>
+    </div>
+    <div
+        style="flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; flex-direction: column;">
+        <canvas id="timeSeriesChart"></canvas>
+    </div>
+</div>
+
+{{ chart_data|json_script:"chart-data" }}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const data = JSON.parse(document.getElementById('chart-data').textContent);
+
+        // --- Shared Dark Mode Options ---
+        const sharedOptions = {
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 2, // Forces both charts to share the same shape
+            plugins: {
+                title: {
+                    display: true,
+                    font: { size: 16 },
+                    color: '#ffffff',
+                    padding: { bottom: 20 }
+                }
+            }
+        };
+
+        // --- Category Chart (Doughnut) ---
+        const catCtx = document.getElementById('categoryChart').getContext('2d');
+        new Chart(catCtx, {
+            type: 'doughnut',
+            data: {
+                labels: data.categories.labels,
+                datasets: [{
+                    label: 'Jobs by Category',
+                    data: data.categories.values,
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(153, 102, 255, 0.8)',
+                        'rgba(255, 159, 64, 0.8)'
+                    ],
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                ...sharedOptions,
+                plugins: {
+                    ...sharedOptions.plugins,
+                    legend: {
+                        display: true,
+                        position: 'right', // Side legend helps maintain vertical space equality with the line chart
+                        labels: { color: '#e0e0e0', boxWidth: 12, font: { size: 11 } }
+                    },
+                    title: { ...sharedOptions.plugins.title, text: 'Jobs by Category' }
+                }
+            }
+        });
+
+        // --- Time Series Chart (Line) ---
+        const timeCtx = document.getElementById('timeSeriesChart').getContext('2d');
+        new Chart(timeCtx, {
+            type: 'line',
+            data: {
+                labels: data.time_series.labels,
+                datasets: [{
+                    label: 'Jobs Created Over Time',
+                    data: data.time_series.values,
+                    fill: true,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointBackgroundColor: 'rgb(75, 192, 192)'
+                }]
+            },
+            options: {
+                ...sharedOptions,
+                plugins: {
+                    ...sharedOptions.plugins,
+                    legend: { display: false },
+                    title: { ...sharedOptions.plugins.title, text: 'Jobs Created Over Time' }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#b0b0b0' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#b0b0b0', stepSize: 1 },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+{{ block.super }}
+{% endblock %}

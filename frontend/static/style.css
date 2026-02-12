@@ -958,6 +958,17 @@ header .right img {
 .auth-container {
     max-width: 500px;
     width: 100%;
+    transition: all 0.3s ease;
+    border-top: 5px solid transparent;
+}
+
+.auth-container.role-student {
+    border-top-color: #0f2182;
+}
+
+.auth-container.role-company {
+    border-top-color: #1a237e;
+    background-color: #fcfdff;
 }
 
 .auth-container h2 {

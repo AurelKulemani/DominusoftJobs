@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -6,6 +6,8 @@ from django.contrib import messages
 from .models import Job, Category, CV, UserProfile, Application, ContactMessage, Project
 from .oauth import verify_google_token
 from .utils import extract_text_from_file, parse_cv_data, process_cv_and_update_profile, calculate_match_score, extract_skills
+from hitcount.views import HitCountDetailView
+from hitcount.utils import get_hitcount_model
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
@@ -143,11 +145,15 @@ def jobs_list(request):
 
 @login_required
 def profile(request, user_id=None):
-    from django.shortcuts import get_object_or_404
-    
     if user_id:
         viewed_user = get_object_or_404(User, id=user_id)
         is_own_profile = (viewed_user == request.user)
+        
+        # Track hit for public profile
+        if not is_own_profile:
+            profile_obj = viewed_user.profile
+            hit_count = get_hitcount_model().objects.get_for_object(profile_obj)
+            HitCountDetailView.hit_count(request, hit_count)
     else:
         viewed_user = request.user
         is_own_profile = True
@@ -319,6 +325,10 @@ def apply_job(request, job_id):
         return redirect(f"{reverse('login')}?next={request.path}")
 
     job = get_object_or_404(Job, id=job_id)
+
+    # Track hit for job
+    hit_count = get_hitcount_model().objects.get_for_object(job)
+    HitCountDetailView.hit_count(request, hit_count)
 
     try:
         profile = request.user.profile
@@ -558,6 +568,8 @@ def signup_view(request):
         confirm_password = request.POST.get('confirm_password')
         user_type = request.POST.get('user_type')
         company_name = request.POST.get('company_name')
+        website = request.POST.get('website')
+        location = request.POST.get('location')
 
         if password != confirm_password:
             messages.error(request, "Passwords do not match")
@@ -568,7 +580,13 @@ def signup_view(request):
             return render(request, 'signup.html', {'next': next_url})
 
         user = User.objects.create_user(username=username, email=email, password=password)
-        UserProfile.objects.create(user=user, user_type=user_type, company_name=company_name)
+        UserProfile.objects.create(
+            user=user, 
+            user_type=user_type, 
+            company_name=company_name,
+            website=website,
+            location=location
+        )
 
         login(request, user)
 
@@ -741,42 +759,111 @@ def save_cv_data(request):
             
             # Handle Experience
             experiences = data.get('experiences', [])
+            from datetime import datetime
+            
             if experiences:
-                # Clear existing experiences if replacing
                 cv.experiences.all().delete()
                 for exp in experiences:
                     from .models import Experience
-                    from datetime import datetime
                     
-                    # Basic date parsing - adjust based on frontend format
                     start_date = exp.get('startDate')
                     end_date = exp.get('endDate')
                     
                     try:
+                        parsed_start = None
                         if start_date:
-                            if len(start_date) == 7: # YYYY-MM
-                                start_date = datetime.strptime(start_date, '%Y-%m').date()
-                            else:
-                                start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+                            parsed_start = datetime.strptime(start_date, '%Y-%m').date() if len(start_date) == 7 else datetime.strptime(start_date, '%Y-%m-%d').date()
                         
+                        parsed_end = None
                         if end_date:
-                            if len(end_date) == 7: # YYYY-MM
-                                end_date = datetime.strptime(end_date, '%Y-%m').date()
-                            else:
-                                end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-                        else:
-                            end_date = None
+                            parsed_end = datetime.strptime(end_date, '%Y-%m').date() if len(end_date) == 7 else datetime.strptime(end_date, '%Y-%m-%d').date()
                             
                         Experience.objects.create(
                             cv=cv,
                             company=exp.get('company'),
                             position=exp.get('position'),
-                            start_date=start_date,
-                            end_date=end_date,
+                            start_date=parsed_start,
+                            end_date=parsed_end,
                             description=exp.get('description', '')
                         )
                     except Exception as e:
                         print(f"Error saving experience: {e}")
+
+            # Handle Education
+            education_data = data.get('education', [])
+            if education_data:
+                cv.education.all().delete()
+                for edu in education_data:
+                    from .models import Education
+                    
+                    edu_start_date = edu.get('startDate')
+                    edu_end_date = edu.get('endDate')
+                    
+                    try:
+                        parsed_edu_start = None
+                        if edu_start_date:
+                            parsed_edu_start = datetime.strptime(edu_start_date, '%Y-%m').date() if len(edu_start_date) == 7 else datetime.strptime(edu_start_date, '%Y-%m-%d').date()
+                        
+                        parsed_edu_end = None
+                        if edu_end_date:
+                            parsed_edu_end = datetime.strptime(edu_end_date, '%Y-%m').date() if len(edu_end_date) == 7 else datetime.strptime(edu_end_date, '%Y-%m-%d').date()
+                            
+                        Education.objects.create(
+                            cv=cv,
+                            institution=edu.get('institution'),
+                            degree=edu.get('degree'),
+                            field_of_study=edu.get('field'),
+                            start_date=parsed_edu_start,
+                            end_date=parsed_edu_end,
+                            gpa=edu.get('gpa'),
+                            location=edu.get('location')
+                        )
+                    except Exception as e:
+                        print(f"Error saving education: {e}")
+
+            # Handle Certifications
+            certs_data = data.get('certifications', [])
+            if certs_data:
+                cv.certifications.all().delete()
+                for cert in certs_data:
+                    from .models import Certification
+                    
+                    issue_date = cert.get('issueDate')
+                    exp_date = cert.get('expiryDate')
+                    
+                    try:
+                        parsed_issue = None
+                        if issue_date:
+                            parsed_issue = datetime.strptime(issue_date, '%Y-%m').date() if len(issue_date) == 7 else datetime.strptime(issue_date, '%Y-%m-%d').date()
+                        
+                        parsed_exp = None
+                        if exp_date:
+                            parsed_exp = datetime.strptime(exp_date, '%Y-%m').date() if len(exp_date) == 7 else datetime.strptime(exp_date, '%Y-%m-%d').date()
+                            
+                        Certification.objects.create(
+                            cv=cv,
+                            name=cert.get('name'),
+                            issuing_organization=cert.get('organization'),
+                            issue_date=parsed_issue,
+                            expiration_date=parsed_exp,
+                            credential_id=cert.get('credentialId')
+                        )
+                    except Exception as e:
+                        print(f"Error saving certification: {e}")
+
+            # Handle Projects
+            projects_data = data.get('projects', [])
+            if projects_data:
+                user.projects.all().delete()
+                for proj in projects_data:
+                    from .models import Project
+                    Project.objects.create(
+                        user=user,
+                        title=proj.get('name'),
+                        description=proj.get('description', ''),
+                        github_link=proj.get('url') if 'github.com' in (proj.get('url') or '') else None,
+                        live_link=proj.get('url') if 'github.com' not in (proj.get('url') or '') else None
+                    )
             
             return JsonResponse({'status': 'success', 'message': 'CV data saved successfully!'})
         except Exception as e:
@@ -824,11 +911,15 @@ def download_cv_pdf(request):
         return redirect('student_dashboard')
 
     experiences = cv.experiences.all().order_by('-start_date')
+    education = cv.education.all().order_by('-start_date')
+    certifications = cv.certifications.all().order_by('-issue_date')
     
     context = {
         'user': request.user,
         'cv': cv,
         'experiences': experiences,
+        'education': education,
+        'certifications': certifications,
         'skills_tech': cv.skills,
         'skills_soft': cv.soft_skills,
         'languages': cv.languages,
@@ -852,3 +943,12 @@ def download_cv_pdf(request):
     if pisa_status.err:
        return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        user = request.user
+        logout(request)
+        user.delete()
+        messages.success(request, "Your account has been permanently deleted.")
+        return JsonResponse({'status': 'success', 'message': 'Account deleted successfully'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)

@@ -25,4 +25,6 @@ urlpatterns = [
     path('delete-project/<int:project_id>/', views.delete_project, name='delete_project'),
     path('save-cv/', views.save_cv_data, name='save_cv_data'),
     path('download-cv-pdf/', views.download_cv_pdf, name='download_cv_pdf'),
+    path('delete-account/', views.delete_account, name='delete_account'),
+
 ]

@@ -1,12 +1,18 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.fields import GenericRelation
+from hitcount.models import HitCountMixin, HitCount
 
-class UserProfile(models.Model):
+class UserProfile(models.Model, HitCountMixin):
     USER_TYPES = (
         ('student', 'Student'),
         ('company', 'Company'),
     )
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    hit_count_generic = GenericRelation(
+        HitCount, object_id_field='object_pk',
+        related_query_name='hit_count_generic_relation'
+    )
     user_type = models.CharField(max_length=10, choices=USER_TYPES)
     phone = models.CharField(max_length=20, blank=True, null=True)
     location = models.CharField(max_length=255, blank=True, null=True)
@@ -42,6 +48,30 @@ class Experience(models.Model):
     def __str__(self):
         return f"{self.position} at {self.company}"
 
+class Education(models.Model):
+    cv = models.ForeignKey(CV, on_delete=models.CASCADE, related_name='education')
+    institution = models.CharField(max_length=200)
+    degree = models.CharField(max_length=200)
+    field_of_study = models.CharField(max_length=200, blank=True, null=True)
+    start_date = models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
+    gpa = models.CharField(max_length=20, blank=True, null=True)
+    location = models.CharField(max_length=200, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.degree} at {self.institution}"
+
+class Certification(models.Model):
+    cv = models.ForeignKey(CV, on_delete=models.CASCADE, related_name='certifications')
+    name = models.CharField(max_length=200)
+    issuing_organization = models.CharField(max_length=200)
+    issue_date = models.DateField(blank=True, null=True)
+    expiration_date = models.DateField(blank=True, null=True)
+    credential_id = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.name} from {self.issuing_organization}"
+
 class Category(models.Model):
     name = models.CharField(max_length=100)
     icon = models.CharField(max_length=50, help_text="Boxicon name, e.g., bx-code-alt")
@@ -49,10 +79,14 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-class Job(models.Model):
+class Job(models.Model, HitCountMixin):
     company = models.ForeignKey(User, on_delete=models.CASCADE, related_name='jobs_posted')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='jobs')
     title = models.CharField(max_length=200)
+    hit_count_generic = GenericRelation(
+        HitCount, object_id_field='object_pk',
+        related_query_name='hit_count_generic_relation'
+    )
     description = models.TextField()
     location = models.CharField(max_length=100)
     salary_range = models.CharField(max_length=100, blank=True, null=True)

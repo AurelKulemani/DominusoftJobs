@@ -1044,32 +1044,66 @@ function getCookie(name) {
 }
 
 function selectRole(role) {
-    document.getElementById('roleSelection').style.display = 'none';
+    const roleSelection = document.getElementById('roleSelection');
+    const signupForm = document.getElementById('signupForm');
+    const authContainer = document.querySelector('.auth-container');
 
-    document.getElementById('signupForm').style.display = 'block';
+    if (roleSelection) roleSelection.style.display = 'none';
+    if (signupForm) signupForm.style.display = 'block';
 
     document.getElementById('userRole').value = role;
 
     const roleIcon = document.getElementById('roleIcon');
     const roleText = document.getElementById('roleText');
     const companyNameGroup = document.getElementById('companyNameGroup');
+    const companyWebsiteGroup = document.getElementById('companyWebsiteGroup');
+    const companyLocationGroup = document.getElementById('companyLocationGroup');
+
+    // Add role-specific class to container
+    if (authContainer) {
+        authContainer.classList.remove('role-student', 'role-company');
+        authContainer.classList.add(`role-${role}`);
+    }
 
     if (role === 'student') {
-        roleIcon.className = 'bx bx-user';
-        roleText.textContent = 'Signing up as Student';
-        companyNameGroup.style.display = 'none';
-        document.getElementById('company-name').removeAttribute('required');
+        if (roleIcon) roleIcon.className = 'bx bx-user';
+        if (roleText) roleText.textContent = 'Signing up as Student';
+        if (companyNameGroup) companyNameGroup.style.display = 'none';
+        if (companyWebsiteGroup) companyWebsiteGroup.style.display = 'none';
+        if (companyLocationGroup) companyLocationGroup.style.display = 'none';
+
+        const companyNameInput = document.getElementById('company-name');
+        if (companyNameInput) companyNameInput.removeAttribute('required');
+
+        const companyLocationInput = document.getElementById('company-location');
+        if (companyLocationInput) companyLocationInput.removeAttribute('required');
     } else {
-        roleIcon.className = 'bx bx-buildings';
-        roleText.textContent = 'Signing up as Company';
-        companyNameGroup.style.display = 'block';
-        document.getElementById('company-name').setAttribute('required', 'required');
+        if (roleIcon) roleIcon.className = 'bx bx-buildings';
+        if (roleText) roleText.textContent = 'Signing up as Company';
+        if (companyNameGroup) companyNameGroup.style.display = 'block';
+        if (companyWebsiteGroup) companyWebsiteGroup.style.display = 'block';
+        if (companyLocationGroup) companyLocationGroup.style.display = 'block';
+
+        const companyNameInput = document.getElementById('company-name');
+        if (companyNameInput) companyNameInput.setAttribute('required', 'required');
+
+        const companyLocationInput = document.getElementById('company-location');
+        if (companyLocationInput) companyLocationInput.setAttribute('required', 'required');
     }
 }
 
 function backToRoleSelection() {
-    document.getElementById('roleSelection').style.display = 'block';
-    document.getElementById('signupForm').style.display = 'none';
+    const roleSelection = document.getElementById('roleSelection');
+    const signupForm = document.getElementById('signupForm');
+    const authContainer = document.querySelector('.auth-container');
+
+    if (roleSelection) roleSelection.style.display = 'block';
+    if (signupForm) signupForm.style.display = 'none';
+
+    // Remove role-specific classes
+    if (authContainer) {
+        authContainer.classList.remove('role-student', 'role-company');
+    }
 }
 
 function handleSignupWithRole(e) {
@@ -2112,8 +2146,29 @@ function closeProjectModal() {
 }
 
 function deleteAccount() {
+    console.log("Delete Account button clicked");
     if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-        alert('Account deletion feature coming soon!');
+        console.log("Deletion confirmed, sending POST request...");
+        fetch('/delete-account/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Your account has been deleted.');
+                    window.location.href = '/';
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while deleting your account.');
+            });
     }
 }
 
