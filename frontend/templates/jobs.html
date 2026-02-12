@@ -122,7 +122,11 @@
             </div>
             <div class="job-info">
                 <h4>{{ job.title }}</h4>
-                <p class="job-company">{{ job.company.username }}</p>
+                <p class="job-company">
+                    <a href="{% url 'public_profile' job.company.id %}">
+                        {{ job.company.profile.company_name|default:job.company.username }}
+                    </a>
+                </p>
             </div>
         </div>
         <div class="job-actions">
@@ -139,4 +143,101 @@
     {% endfor %}
     </div>
 </section>
+
+{% if matching_companies %}
+<section class="companies-search-section pb-100">
+    <div class="container">
+        <h3 class="section-title">Companies Matching "{{ query }}"</h3>
+        <div class="companies-grid">
+            {% for company_profile in matching_companies %}
+            <div class="company-card">
+                <div class="company-logo">
+                    {% if company_profile.profile_picture %}
+                    <img src="{{ company_profile.profile_picture.url }}" alt="{{ company_profile.company_name }}">
+                    {% else %}
+                    <i class='bx bx-building'></i>
+                    {% endif %}
+                </div>
+                <div class="company-info">
+                    <h4>{{ company_profile.company_name|default:company_profile.user.username }}</h4>
+                    <p><i class='bx bx-map'></i> {{ company_profile.location|default:"Global" }}</p>
+                    <a href="{% url 'public_profile' company_profile.user.id %}" class="view-profile-link">View
+                        Profile</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<style>
+    .companies-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .company-card {
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        transition: transform 0.3s ease;
+    }
+
+    .company-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .company-logo {
+        width: 60px;
+        height: 60px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .company-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+
+    .company-logo i {
+        font-size: 30px;
+        color: #6c757d;
+    }
+
+    .company-info h4 {
+        margin: 0 0 5px 0;
+        font-size: 1.1rem;
+    }
+
+    .company-info p {
+        margin: 0 0 10px 0;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .view-profile-link {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .section-title {
+        margin-bottom: 25px;
+        font-weight: 600;
+    }
+</style>
+{% endif %}
 {% endblock %}

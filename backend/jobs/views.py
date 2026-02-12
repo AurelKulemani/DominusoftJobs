@@ -74,9 +74,19 @@ def jobs_list(request):
     posted = request.GET.get('posted', 'any')
 
     jobs = Job.objects.all()
+    matching_companies = UserProfile.objects.none()
 
     if query:
-        jobs = jobs.filter(Q(title__icontains=query) | Q(description__icontains=query))
+        jobs = jobs.filter(
+            Q(title__icontains=query) | 
+            Q(description__icontains=query) |
+            Q(company__profile__company_name__icontains=query)
+        ).distinct()
+        
+        matching_companies = UserProfile.objects.filter(
+            user_type='company',
+            company_name__icontains=query
+        )
 
     if location:
         jobs = jobs.filter(location__icontains=location)
@@ -140,10 +150,10 @@ def jobs_list(request):
         'selected_experience': experience,
         'selected_work_location': work_location,
         'selected_posted': posted,
+        'matching_companies': matching_companies,
     }
     return render(request, 'jobs.html', context)
 
-@login_required
 def profile(request, user_id=None):
     if user_id:
         viewed_user = get_object_or_404(User, id=user_id)
@@ -155,6 +165,8 @@ def profile(request, user_id=None):
             hit_count = get_hitcount_model().objects.get_for_object(profile_obj)
             HitCountDetailView.hit_count(request, hit_count)
     else:
+        if not request.user.is_authenticated:
+            return redirect('login')
         viewed_user = request.user
         is_own_profile = True
 
@@ -209,6 +221,13 @@ def profile(request, user_id=None):
 
     projects = viewed_user.projects.all().order_by('-created_at')
     applications = Application.objects.filter(student=viewed_user).order_by('-applied_at')
+    
+    # Fetch company jobs and total applicants if viewed user is a company
+    company_jobs = []
+    total_applicants = 0
+    if viewed_user.profile.user_type == 'company':
+        company_jobs = viewed_user.jobs_posted.all().order_by('-created_at')
+        total_applicants = Application.objects.filter(job__in=company_jobs).count()
 
     # Pre-process skills and experiences for the overview tab
     user_skills = []
@@ -234,6 +253,8 @@ def profile(request, user_id=None):
         'is_own_profile': is_own_profile,
         'projects': projects,
         'applications': applications,
+        'company_jobs': company_jobs,
+        'total_applicants': total_applicants,
         'user_skills': user_skills[:8], # Limit to top 8 for overview
         'user_soft_skills': user_soft_skills[:8],
         'user_languages': user_languages[:8],

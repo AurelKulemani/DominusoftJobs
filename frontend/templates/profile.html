@@ -34,16 +34,25 @@
                 <a href="#" class="cv-nav-item active" onclick="showProfileTab(event, 'overview')">
                     <i class='bx bx-home'></i>Overview
                 </a>
+                {% if viewed_user.profile.user_type == 'company' %}
+                <a href="#" class="cv-nav-item" onclick="showProfileTab(event, 'companyJobs')">
+                    <i class='bx bx-briefcase'></i>Posted Jobs
+                </a>
+                {% endif %}
+                {% if viewed_user.profile.user_type == 'student' %}
                 <a href="#" class="cv-nav-item" onclick="showProfileTab(event, 'cv')">
                     <i class='bx bx-file'></i>{% if is_own_profile %}My CV{% else %}CV Details{% endif %}
                 </a>
+                {% endif %}
                 {% if is_own_profile %}
                 <a href="#" class="cv-nav-item" onclick="showProfileTab(event, 'applications')">
                     <i class='bx bx-briefcase'></i>My Applications
                 </a>
+                {% if viewed_user.profile.user_type == 'student' %}
                 <a href="#" class="cv-nav-item" onclick="showProfileTab(event, 'projects')">
-                    <i class='bx bx-grid-alt'></i>{% if is_own_profile %}My Projects{% else %}Projects{% endif %}
+                    <i class='bx bx-grid-alt'></i>My Projects
                 </a>
+                {% endif %}
                 <a href="#" class="cv-nav-item" onclick="showProfileTab(event, 'settings')">
                     <i class='bx bx-cog'></i>Settings
                 </a>
@@ -64,6 +73,7 @@
 
                     <div class="cv-form-grid mt-20">
                         <!-- Stats Cards -->
+                        {% if viewed_user.profile.user_type == 'student' %}
                         <div class="cv-item-card stats-card">
                             <i class='bx bx-file stats-icon-box'></i>
                             <div>
@@ -84,6 +94,28 @@
                                 <p class="stats-value">{{ applications.count }}</p>
                             </div>
                         </div>
+                        {% elif viewed_user.profile.user_type == 'company' %}
+                        <div class="cv-item-card stats-card">
+                            <i class='bx bx-briefcase stats-icon-box'></i>
+                            <div>
+                                <h4 class="stats-title">Jobs Posted</h4>
+                                <p class="stats-value">{{ company_jobs.count }}</p>
+                            </div>
+                        </div>
+                        <div class="cv-item-card stats-card">
+                            <i class='bx bx-group stats-icon-box'></i>
+                            <div>
+                                <h4 class="stats-title">Total Applicants</h4>
+                                <p class="stats-value">
+                                    {% if is_own_profile %}
+                                    {{ total_applicants|default:0 }}
+                                    {% else %}
+                                    Public info
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
 
                     <div class="overview-grid mt-30">
@@ -118,6 +150,7 @@
                         </div>
 
                         <!-- Experience & Skills Card -->
+                        {% if viewed_user.profile.user_type == 'student' %}
                         <div class="cv-content-card border-eee">
                             <div class="cv-tab-header">
                                 <h4 class="nav-card-title m-0"><i class='bx bx-briefcase'></i> Professional Profile</h4>
@@ -132,10 +165,19 @@
                                         <div class="mb-15 pb-10 {% if not forloop.last %}bb-1-eee{% endif %}">
                                             <div class="flex-between">
                                                 <h5 class="m-0 text-primary">{{ exp.position }}</h5>
-                                                <span class="text-muted small">{{ exp.start_date|date:"M Y" }} - {% if exp.end_date %}{{ exp.end_date|date:"M Y" }}{% else %}Present{% endif %}</span>
+                                                <span class="text-muted small">
+                                                    {{ exp.start_date|date:"M Y" }} -
+                                                    {% if exp.end_date %}
+                                                    {{ exp.end_date|date:"M Y" }}
+                                                    {% else %}
+                                                    Present
+                                                    {% endif %}
+                                                </span>
                                             </div>
                                             <p class="m-0 small fw-500">{{ exp.company }}</p>
-                                            <p class="m-0 mt-5 small text-muted lh-1-4">{{                         exp.description|truncatewords:20 }}</p>
+                                            <p class="m-0 mt-5 small text-muted lh-1-4">
+                                                {{ exp.description|truncatewords:20 }}
+                                            </p>
                                         </div>
                                         {% endfor %}
                                         {% else %}
@@ -196,6 +238,7 @@
                                 </div>
                             </div>
                         </div>
+                        {% endif %}
                     </div>
 
                     {% if is_own_profile %}
@@ -265,7 +308,8 @@
                         {% if viewed_user.cv.resume_file %}
                         <div class="mt-15">
                             <a href="{{ viewed_user.cv.resume_file.url }}" target="_blank" class="cv-link">
-                                <i class='bx bx-download'></i> {% if is_own_profile %}Download Current CV{% else                 %}Download CV{% endif %}
+                                <i class='bx bx-download'></i> {% if is_own_profile %}Download Current CV{% else
+                                %}Download CV{% endif %}
                             </a>
                         </div>
                         {% endif %}
@@ -294,6 +338,44 @@
                         {% else %}
                         <p class="empty-state-text-mb">This user haven't uploaded or created a CV yet.</p>
                         {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div id="companyJobsTab" class="profile-tab display-none">
+                <div class="cv-content-card">
+                    <div class="cv-tab-header">
+                        <div>
+                            <h3>Jobs Posted by {{ viewed_user.profile.company_name|default:viewed_user.username }}</h3>
+                            <p>Browse available opportunities from this company</p>
+                        </div>
+                    </div>
+
+                    {% if company_jobs %}
+                    <div class="jobs-list">
+                        {% for job in company_jobs %}
+                        <div class="job-item p-15 bb-1-eee flex-between align-center">
+                            <div class="job-info">
+                                <h4 class="m-0 mb-5">{{ job.title }}</h4>
+                                <div class="flex-gap-10 text-muted small">
+                                    <span><i class='bx bx-map'></i> {{ job.location }}</span>
+                                    <span><i class='bx bx-time'></i> {{ job.job_type }}</span>
+                                    <span><i class='bx bx-calendar'></i> {{ job.created_at|date:"M d, Y" }}</span>
+                                </div>
+                            </div>
+                            <div class="job-actions">
+                                <a href="{% url 'apply_job' job.id %}" class="cv-btn cv-btn-primary-outline">View &
+                                    Apply</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state-container">
+                        <i class='bx bx-briefcase-alt' class="empty-state-icon"></i>
+                        <h3 class="mb-15">No Jobs Posted Yet</h3>
+                        <p class="empty-state-text-mb">This company hasn't posted any job openings yet.</p>
                     </div>
                     {% endif %}
                 </div>

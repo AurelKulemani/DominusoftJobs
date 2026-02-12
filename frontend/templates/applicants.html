@@ -68,13 +68,13 @@
                                         class="action-form-premium">
                                         {% csrf_token %}
                                         <select name="status" class="select-premium">
-                                            <option value="pending" {% if app.status=='pending' %}selected{% endif %}>
+                                            <option value="pending" {% if app.status == 'pending' %}selected{% endif %}>
                                                 Pending</option>
-                                            <option value="reviewed" {% if app.status=='reviewed' %}selected{% endif %}>
+                                            <option value="reviewed" {% if app.status == 'reviewed' %}selected{% endif %}>
                                                 Reviewed</option>
-                                            <option value="accepted" {% if app.status=='accepted' %}selected{% endif %}>
+                                            <option value="accepted" {% if app.status == 'accepted' %}selected{% endif %}>
                                                 Accepted</option>
-                                            <option value="rejected" {% if app.status=='rejected' %}selected{% endif %}>
+                                            <option value="rejected" {% if app.status == 'rejected' %}selected{% endif %}>
                                                 Rejected</option>
                                         </select>
                                         <button type="submit" class="btn-update-status">Update</button>
