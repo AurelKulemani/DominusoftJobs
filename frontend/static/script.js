@@ -352,30 +352,114 @@ function removeCertification(id) {
     }
 }
 
+let g_is_initialized = false;
+
+function renderGoogleButton(theme) {
+    console.log('Attempting to render Google button for theme:', theme);
+    const googleBtn = document.getElementById('google-signin-btn') || document.getElementById('google-signup-btn');
+
+    if (googleBtn && window.google && window.google.accounts) {
+        // Clear previous button content to ensure fresh render
+        googleBtn.innerHTML = '';
+
+        // Fallback width if parent has no width (e.g., hidden container)
+        const width = googleBtn.parentElement.clientWidth || 300;
+
+        try {
+            google.accounts.id.renderButton(
+                googleBtn,
+                {
+                    theme: 'outline',
+                    size: 'large',
+                    shape: 'rectangular',
+                    logo_alignment: 'left',
+                    width: width,
+                    text: googleBtn.id === 'google-signin-btn' ? 'signin_with' : 'signup_with',
+                    color_scheme: 'light'
+                }
+            );
+            console.log('Google button render call completed.');
+        } catch (err) {
+            console.error('Error during google.accounts.id.renderButton:', err);
+        }
+    } else {
+        console.warn('Rendering skipped: Button or Google library missing.');
+    }
+}
+
+function initGoogleButton() {
+    if (g_is_initialized) {
+        console.log('Google Identity Services already initialized.');
+        const theme = document.documentElement.getAttribute('data-theme') || 'light';
+        renderGoogleButton(theme);
+        return;
+    }
+
+    const googleBtn = document.getElementById('google-signin-btn') || document.getElementById('google-signup-btn');
+    if (googleBtn) {
+        if (window.google && window.google.accounts) {
+            console.log('Initializing Google Identity Services...');
+            const theme = document.documentElement.getAttribute('data-theme') || 'light';
+
+            // Get config from g_id_onload div
+            const configDiv = document.getElementById('g_id_onload');
+            const client_id = configDiv?.getAttribute('data-client_id') || "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
+            const callbackName = configDiv?.getAttribute('data-callback');
+
+            google.accounts.id.initialize({
+                client_id: client_id,
+                callback: window[callbackName] || (googleBtn.id === 'google-signin-btn' ? handleGoogleSignIn : handleGoogleSignUpWithRole)
+            });
+
+            g_is_initialized = true;
+            renderGoogleButton(theme);
+        } else {
+            // Keep checking until Google library is loaded
+            setTimeout(initGoogleButton, 100);
+        }
+    }
+}
+
 function toggleTheme() {
-    document.body.classList.toggle('dark-mode');
-    const isDark = document.body.classList.contains('dark-mode');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    updateThemeIcon(isDark);
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+    console.log('Toggling theme to:', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme === 'dark');
+    renderGoogleButton(newTheme);
 }
 
 function updateThemeIcon(isDark) {
-    const icon = document.querySelector('#themeToggle i');
+    const icon = document.querySelector('#theme-toggle i');
     if (icon) {
         if (isDark) {
-            icon.classList.replace('bx-moon', 'bx-sun');
+            icon.className = 'bx bx-sun';
         } else {
-            icon.classList.replace('bx-sun', 'bx-moon');
+            icon.className = 'bx bx-moon';
         }
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-        updateThemeIcon(true);
+    console.log('Script loaded, initializing theme...');
+    const savedTheme = localStorage.getItem('theme') || 'light';
+
+    // Ensure initial state
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme === 'dark');
+
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        console.log('Theme toggle button found, adding listener');
+        themeToggle.addEventListener('click', toggleTheme);
+    } else {
+        console.error('Theme toggle button NOT found!');
     }
+
+    // Initialize Google Button
+    initGoogleButton();
 });
 
 function openApplicationModal(jobTitle) {
@@ -1050,6 +1134,10 @@ function selectRole(role) {
 
     if (roleSelection) roleSelection.style.display = 'none';
     if (signupForm) signupForm.style.display = 'block';
+
+    // Re-render Google button since the form container just became visible
+    const theme = document.documentElement.getAttribute('data-theme') || 'light';
+    renderGoogleButton(theme);
 
     document.getElementById('userRole').value = role;
 

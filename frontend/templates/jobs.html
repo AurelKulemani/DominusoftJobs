@@ -127,20 +127,19 @@
                         {{ job.company.profile.company_name|default:job.company.username }}
                     </a>
                 </p>
+                {% if job.match_score %}
+                <div class="match-badge" title="Matching score based on your skills">
+                    <i class='bx bxs-zap'></i> {{ job.match_score }}% Match
+                </div>
+                {% endif %}
+            </div>
+            <div class="job-actions">
+                <a href="{% url 'apply_job' job.id %}" class="job-apply-btn job-apply-link">Apply Now</a>
             </div>
         </div>
-        <div class="job-actions">
-            {% if job.match_score %}
-            <div class="match-badge" title="Matching score based on your skills">
-                <i class='bx bxs-zap'></i> {{ job.match_score }}% Match
-            </div>
-            {% endif %}
-            <a href="{% url 'apply_job' job.id %}" class="job-apply-btn job-apply-link">Apply Now</a>
-        </div>
-    </div>
-    {% empty %}
-    <p>No jobs found matching your criteria.</p>
-    {% endfor %}
+        {% empty %}
+        <p>No jobs found matching your criteria.</p>
+        {% endfor %}
     </div>
 </section>
 
@@ -179,7 +178,7 @@
     }
 
     .company-card {
-        background: #fff;
+        background: var(--bg-card);
         padding: 20px;
         border-radius: 12px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
@@ -187,6 +186,8 @@
         align-items: center;
         gap: 15px;
         transition: transform 0.3s ease;
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
     }
 
     .company-card:hover {
@@ -196,12 +197,13 @@
     .company-logo {
         width: 60px;
         height: 60px;
-        background: #f8f9fa;
+        background: var(--bg-body);
         border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
+        border: 1px solid var(--border-color);
     }
 
     .company-logo img {
@@ -213,22 +215,23 @@
 
     .company-logo i {
         font-size: 30px;
-        color: #6c757d;
+        color: var(--primary-color);
     }
 
     .company-info h4 {
         margin: 0 0 5px 0;
         font-size: 1.1rem;
+        color: var(--text-main);
     }
 
     .company-info p {
         margin: 0 0 10px 0;
-        color: #6c757d;
+        color: var(--text-muted);
         font-size: 0.9rem;
     }
 
     .view-profile-link {
-        color: #007bff;
+        color: var(--primary-color);
         text-decoration: none;
         font-weight: 500;
         font-size: 0.9rem;
@@ -237,6 +240,7 @@
     .section-title {
         margin-bottom: 25px;
         font-weight: 600;
+        color: var(--text-main);
     }
 </style>
 {% endif %}

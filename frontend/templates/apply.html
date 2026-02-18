@@ -17,17 +17,19 @@
     .apply-card {
         background: #ffffff;
         width: 100%;
-        max-width: 700px;
-        border-radius: 16px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        max-width: 800px;
+        /* Slightly wider for better balance */
+        border-radius: 20px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+        /* Softer, deeper shadow */
         overflow: hidden;
-        animation: fadeIn 0.5s ease-out;
+        animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     @keyframes fadeIn {
         from {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(30px);
         }
 
         to {
@@ -38,24 +40,29 @@
 
     .apply-card-header {
         background: linear-gradient(135deg, #0f2182 0%, #1a237e 100%);
-        padding: 40px;
+        padding: 50px 40px;
+        /* More vertical breathing room */
         color: white;
         text-align: center;
     }
 
     .apply-card-header h2 {
-        font-size: 28px;
-        margin-bottom: 10px;
+        font-size: 32px;
+        margin-bottom: 12px;
         font-weight: 700;
+        letter-spacing: -0.5px;
     }
 
     .apply-card-header p {
-        opacity: 0.9;
-        font-size: 16px;
+        opacity: 0.85;
+        font-size: 17px;
+        max-width: 500px;
+        margin: 0 auto;
     }
 
     .apply-card-body {
-        padding: 40px;
+        padding: 50px 60px;
+        /* More horizontal padding for central focus */
     }
 
     .job-details-mini {

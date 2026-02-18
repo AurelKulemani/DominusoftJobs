@@ -6,9 +6,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="{% static 'style.css' %}?v=1.5">
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=1.7">
     <title>{% block title %}DominusoftJobs{% endblock %}</title>
 
+    <script>
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
     {% block extra_head %}{% endblock %}
 </head>
 
@@ -31,6 +35,9 @@
                 Work</a>
         </div>
         <div class="login">
+            <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Dark/Light Mode">
+                <i class='bx bx-moon'></i>
+            </button>
             {% if user.is_authenticated %}
             {% if user.profile.user_type == 'student' %}
             <button data-url="{% url 'student_dashboard' %}"
@@ -66,7 +73,7 @@
 
     {% include 'footer.html' %}
 
-    <script src="{% static 'script.js' %}?v=1.4"></script>
+    <script src="{% static 'script.js' %}?v=1.6"></script>
     {% block extra_js %}{% endblock %}
 </body>
 
